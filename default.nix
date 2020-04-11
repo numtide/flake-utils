@@ -23,4 +23,15 @@ rec {
   #   > x86_64-linux = null; }
   # (system -> attrs) -> attrs
   forAllSupported = genAttrs supportedSystems;
+
+  # Returns the structure used by `nix app`
+  mkApp =
+    { drv
+    , name ? drv.pname or drv.name
+    , exePath ? drv.passthru.exePath or "/bin/${name}"
+    }:
+    {
+      type = "app";
+      program = "${drv}${exePath}";
+    };
 }
