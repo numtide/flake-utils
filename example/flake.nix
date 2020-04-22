@@ -13,7 +13,7 @@
       rec {
         packages.hello = pkgs.hello;
         defaultPackage = packages.hello;
-        apps.hello = utils.lib.mkApp packages.hello;
+        apps.hello = utils.lib.mkApp { drv = packages.hello; };
         defaultApp = apps.hello;
       }
     );

@@ -25,7 +25,7 @@ let
       op = attrs: system:
         let
           ret = f system;
-          opt = attrs: key:
+          op = attrs: key:
             attrs //
             {
               ${key} = (attrs.${key} or {}) // { ${system} = ret.${key}; };
