@@ -1,6 +1,6 @@
 # flake-utils
 
-**STATUS: WIP**
+**STATUS: alpha**
 
 Pure Nix flake utility functions.
 
@@ -10,31 +10,54 @@ flakes.
 
 ## Usage
 
-`flake.nix`
+### `defaultSystems -> [<system>]`
+
+A list of all the systems supported by the nixpkgs project.
+
+### `eachSystem -> [<system>] -> (<system> -> attrs)`
+
+A common case is to build the same structure for each system. Instead of
+building the hierarchy manually or per prefix, iterate over each systems and
+then re-build the hierarchy.
+
+Eg:
+
+```nix
+eachSystem ["x86-64-linux"] (system: { hello = 42; })
+# => { hello.x86-64-linux.hello = 42; }
+```
+
+### `eachDefaultSystem -> (<system> -> attrs)`
+
+`eachSystem` pre-populated with `defaultSystems`.
+
+### `mkApp { drv, name ? drv.pname or drv.name, execPath ? drv.passthru.execPath or "/bin/${name}"`
+
+A small utility that builds the structure expected by the special `apps` and `defaultApp` prefixes.
+
+## Example
+
+Here is how it looks like in practice:
+
+[$ example/flake.nix](example/flake.nix) as nix
 ```nix
 {
+  description = "Flake utils demo";
   edition = 201909;
-  description = "My flake";
-  inputs = {
-    utils = { type = "github"; owner = "numtide"; repo = "flake-utils"; };
+
+  inputs.utils = {
+    uri = "github:numtide/flake-utils";
   };
+
   outputs = { self, nixpkgs, utils }:
-    utils.eachDefaultSystem (system:
+    utils.lib.eachDefaultSystem (system:
       let pkgs = nixpkgs.legacyPackages.${system}; in
       rec {
-        packages = {
-          my-app = pkgs.callPackage ./my-app.nix {};
-        };
-
-        defaultPackage = package.my-app;
-
-        apps = {
-          my-app = flake.mkApp packages.my-app;
-        };
-
-        defaultApp = apps.my-app;
-      };
+        packages.hello = pkgs.hello;
+        defaultPackage = packages.hello;
+        apps.hello = utils.lib.mkApp { drv = packages.hello; };
+        defaultApp = apps.hello;
+      }
     );
 }
 ```
-

@@ -1,0 +1,6 @@
+# Nix
+result
+result-*
+
+# Don't keep the example lockfile around
+/example/flake.lock

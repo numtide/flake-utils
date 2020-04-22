@@ -3,8 +3,7 @@
   edition = 201909;
 
   inputs.utils = {
-    type = "git";
-    uri = "file:///home/zimbatm/go/src/github.com/zimbatm/flake-utils";
+    uri = "github:numtide/flake-utils";
   };
 
   outputs = { self, nixpkgs, utils }:
