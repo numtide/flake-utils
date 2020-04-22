@@ -1,28 +1,41 @@
-rec {
+let
   # copied from <nixpkgs/lib>
   genAttrs = names: f:
     builtins.listToAttrs (map (n: { name = n; value = f n; }) names);
 
+  mapAttrsToList = f: attrs:
+    map (name: f name attrs.${name}) (builtins.attrNames attrs);
+
   # The list of systems supported by nixpkgs and hydra
-  supportedSystems = [
+  defaultSystems = [
     "aarch64-linux"
     "i686-linux"
     "x86_64-darwin"
     "x86_64-linux"
   ];
 
-  # Returns an attribute set with all the supported systems as keys and the
-  # output of the passed function with each system passed to it.
+  # eachSystem using defaultSystems
+  eachDefaultSystem = eachSystem defaultSystems;
+
+  # Builds a map from <attr>=value to <system>.<attr>=value for each system.
   #
-  # This is useful in the flake outputs because the outputs return static sets
-  # that map to the different systems.
   #
-  # Example:
-  #   forAllSupported (x: null)
-  #   > { aarch64-linux = null; i686-linux = null; x86_64-darwin = null;
-  #   > x86_64-linux = null; }
-  # (system -> attrs) -> attrs
-  forAllSupported = genAttrs supportedSystems;
+  eachSystem = systems: f:
+    let
+      op = attrs: system:
+        let
+          ret = f system;
+          opt = attrs: key:
+            attrs //
+            {
+              ${key} = (attrs.${key} or {}) // { ${system} = ret.${key}; };
+            }
+            ;
+        in
+        builtins.foldl' op attrs (builtins.attrNames ret);
+    in
+    builtins.foldl' op {} systems
+    ;
 
   # Returns the structure used by `nix app`
   mkApp =
@@ -34,4 +47,12 @@ rec {
       type = "app";
       program = "${drv}${exePath}";
     };
+in
+{
+  inherit
+    defaultSystems
+    eachDefaultSystem
+    eachSystem
+    mkApp
+    ;
 }
