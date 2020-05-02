@@ -28,14 +28,14 @@ let
           op = attrs: key:
             attrs //
             {
-              ${key} = (attrs.${key} or {}) // { ${system} = ret.${key}; };
+              ${key} = (attrs.${key} or { }) // { ${system} = ret.${key}; };
             }
-            ;
+          ;
         in
         builtins.foldl' op attrs (builtins.attrNames ret);
     in
-    builtins.foldl' op {} systems
-    ;
+    builtins.foldl' op { } systems
+  ;
 
   # Returns the structure used by `nix app`
   mkApp =
