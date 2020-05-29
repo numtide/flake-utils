@@ -1,10 +1,7 @@
 {
   description = "Flake utils demo";
-  edition = 201909;
 
-  inputs.utils = {
-    uri = "github:numtide/flake-utils";
-  };
+  inputs.utils.uri = "github:numtide/flake-utils";
 
   outputs = { self, nixpkgs, utils }:
     utils.lib.eachDefaultSystem (system:
