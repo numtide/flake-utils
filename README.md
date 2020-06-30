@@ -23,8 +23,8 @@ then re-build the hierarchy.
 Eg:
 
 ```nix
-eachSystem ["x86-64-linux"] (system: { hello = 42; })
-# => { hello.x86-64-linux.hello = 42; }
+eachSystem ["x86_64-linux"] (system: { hello = 42; })
+# => { hello.x86_64-linux.hello = 42; }
 ```
 
 ### `eachDefaultSystem -> (<system> -> attrs)`
