@@ -58,3 +58,14 @@ Here is how it looks like in practice:
     );
 }
 ```
+
+## Known issues
+
+```
+$ nix flake check
+warning: unknown flake output 'lib'
+```
+
+nixpkgs is currently having the same issue so I assume that it will be
+eventually standardized.
+
