@@ -13,6 +13,11 @@ flakes.
 ### `defaultSystems -> [<system>]`
 
 A list of all the systems supported by the nixpkgs project.
+Useful if you want add additional platforms:
+
+```nix
+eachSystem (defaultSystems ++ ["armv7l-linux"]) (system: { hello = 42; })
+```
 
 ### `eachSystem -> [<system>] -> (<system> -> attrs)`
 
