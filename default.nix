@@ -47,6 +47,27 @@ let
       type = "app";
       program = "${drv}${exePath}";
     };
+
+  # Nix flakes insists on having a flat attribute set of derivations in
+  # various places like the `packages` and `checks` attributes.
+  #
+  # This function traverses a tree of attributes (by respecting
+  # recurseIntoAttrs) and only returns their derivations, with a flattened
+  # key-space.
+  #
+  # Eg:
+  #
+  #   flattenTree { hello = pkgs.hello; gitAndTools = pkgs.gitAndTools };
+  #
+  # Returns:
+  #
+  #   {
+  #      hello = «derivation»;
+  #      gitAndTools_git = «derivation»;
+  #      gitAndTools_hub = «derivation»;
+  #      # ...
+  #   }
+  flattenTree = tree: import ./flattenTree.nix tree;
 in
 {
   inherit
@@ -55,4 +76,5 @@ in
     eachSystem
     mkApp
     ;
+
 }

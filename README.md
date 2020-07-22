@@ -40,6 +40,30 @@ eachSystem ["x86_64-linux"] (system: { hello = 42; })
 
 A small utility that builds the structure expected by the special `apps` and `defaultApp` prefixes.
 
+### `flattenTree -> attrs -> attrs`
+
+Nix flakes insists on having a flat attribute set of derivations in
+various places like the `packages` and `checks` attributes.
+
+This function traverses a tree of attributes (by respecting
+recurseIntoAttrs) and only returns their derivations, with a flattened
+key-space.
+
+Eg:
+```nix
+flattenTree { hello = pkgs.hello; gitAndTools = pkgs.gitAndTools }
+```
+Returns:
+
+```nix
+{
+  hello = «derivation»;
+  gitAndTools_git = «derivation»;
+  gitAndTools_hub = «derivation»;
+  # ...
+}
+```
+
 ## Example
 
 Here is how it looks like in practice:
