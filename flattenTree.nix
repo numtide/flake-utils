@@ -2,7 +2,7 @@ tree:
 let
   op = sum: path: val:
     let
-      pathStr = builtins.concatStringsSep "_" path;
+      pathStr = builtins.concatStringsSep "/" path;
     in
     if (builtins.typeOf val) != "set" then
     # ignore that value

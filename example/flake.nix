@@ -7,7 +7,10 @@
     flake-utils.lib.eachDefaultSystem (system:
       let pkgs = nixpkgs.legacyPackages.${system}; in
       rec {
-        packages.hello = pkgs.hello;
+        packages = flake-utils.lib.flattenTree {
+          hello = pkgs.hello;
+          gitAndTools = pkgs.gitAndTools;
+        };
         defaultPackage = packages.hello;
         apps.hello = flake-utils.lib.mkApp { drv = packages.hello; };
         defaultApp = apps.hello;

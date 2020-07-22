@@ -52,8 +52,8 @@ let
   #
   #   {
   #      hello = «derivation»;
-  #      gitAndTools_git = «derivation»;
-  #      gitAndTools_hub = «derivation»;
+  #      "gitAndTools/git" = «derivation»;
+  #      "gitAndTools/hub" = «derivation»;
   #      # ...
   #   }
   flattenTree = tree: import ./flattenTree.nix tree;
