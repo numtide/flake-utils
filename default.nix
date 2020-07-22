@@ -37,17 +37,6 @@ let
     builtins.foldl' op { } systems
   ;
 
-  # Returns the structure used by `nix app`
-  mkApp =
-    { drv
-    , name ? drv.pname or drv.name
-    , exePath ? drv.passthru.exePath or "/bin/${name}"
-    }:
-    {
-      type = "app";
-      program = "${drv}${exePath}";
-    };
-
   # Nix flakes insists on having a flat attribute set of derivations in
   # various places like the `packages` and `checks` attributes.
   #
@@ -68,12 +57,24 @@ let
   #      # ...
   #   }
   flattenTree = tree: import ./flattenTree.nix tree;
+
+  # Returns the structure used by `nix app`
+  mkApp =
+    { drv
+    , name ? drv.pname or drv.name
+    , exePath ? drv.passthru.exePath or "/bin/${name}"
+    }:
+    {
+      type = "app";
+      program = "${drv}${exePath}";
+    };
 in
 {
   inherit
     defaultSystems
     eachDefaultSystem
     eachSystem
+    flattenTree
     mkApp
     ;
 
