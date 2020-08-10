@@ -10,9 +10,13 @@ flakes.
 
 ## Usage
 
+### `allSystems -> [<system>]`
+
+A list of all systems defined in nixpkgs. For a smaller list see `defaultSystems`
+
 ### `defaultSystems -> [<system>]`
 
-A list of all the systems supported by the nixpkgs project.
+The list of systems supported by nixpkgs and built by hydra.
 Useful if you want add additional platforms:
 
 ```nix
@@ -30,6 +34,16 @@ Eg:
 ```nix
 eachSystem ["x86_64-linux"] (system: { hello = 42; })
 # => { hello.x86_64-linux.hello = 42; }
+eachSystem allSystems (system: { hello = 42; })
+# => {
+   hello.aarch64-darwin = 42,
+   hello.aarch64-genode = 42,
+   hello.aarch64-linux = 42,
+   ...
+   hello.x86_64-redox = 42,
+   hello.x86_64-solaris = 42,
+   hello.x86_64-windows = 42
+}
 ```
 
 ### `eachDefaultSystem -> (<system> -> attrs)`
