@@ -117,15 +117,20 @@ let
       type = "app";
       program = "${drv}${exePath}";
     };
-in
-{
-  inherit
-    allSystems
-    defaultSystems
-    eachDefaultSystem
-    eachSystem
-    flattenTree
-    mkApp
-    ;
 
-}
+  # This function tries to capture a common flake pattern.
+  simpleFlake = import ./simpleFlake.nix { inherit lib; };
+
+  lib = {
+    inherit
+      allSystems
+      defaultSystems
+      eachDefaultSystem
+      eachSystem
+      flattenTree
+      mkApp
+      simpleFlake
+      ;
+  };
+in
+lib

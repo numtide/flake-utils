@@ -50,9 +50,35 @@ eachSystem allSystems (system: { hello = 42; })
 
 `eachSystem` pre-populated with `defaultSystems`.
 
+#### Example
+
+[$ examples/each-system/flake.nix](examples/each-system/flake.nix) as nix
+```nix
+{
+  description = "Flake utils demo";
+
+  inputs.flake-utils.url = "github:numtide/flake-utils";
+
+  outputs = { self, nixpkgs, flake-utils }:
+    flake-utils.lib.eachDefaultSystem (system:
+      let pkgs = nixpkgs.legacyPackages.${system}; in
+      rec {
+        packages = flake-utils.lib.flattenTree {
+          hello = pkgs.hello;
+          gitAndTools = pkgs.gitAndTools;
+        };
+        defaultPackage = packages.hello;
+        apps.hello = flake-utils.lib.mkApp { drv = packages.hello; };
+        defaultApp = apps.hello;
+      }
+    );
+}
+```
+
 ### `mkApp { drv, name ? drv.pname or drv.name, execPath ? drv.passthru.execPath or "/bin/${name}"`
 
 A small utility that builds the structure expected by the special `apps` and `defaultApp` prefixes.
+
 
 ### `flattenTree -> attrs -> attrs`
 
@@ -78,27 +104,54 @@ Returns:
 }
 ```
 
-## Example
+### `simpleFlake -> attrs -> attrs`
+
+This function should be useful for most common use-cases where you have a
+simple flake that builds a package. It takes nixpkgs and a bunch of other
+parameters and outputs a value that is compatible as a flake output.
+
+Input:
+```nix
+{
+  # pass an instance of self
+  self
+, # pass an instance of the nixpkgs flake
+  nixpkgs
+, # we assume that the name maps to the project name, and also that the
+  # overlay has an attribute with the `name` prefix that contains all of the
+  # project's packages.
+  name
+, # nixpkgs config
+  config ? { }
+, # pass either a function or a file
+  overlay ? null
+, # use this to load other flakes overlays to supplement nixpkgs
+  preOverlays ? [ ]
+, # maps to the devShell output. Pass in a shell.nix file or function.
+  shell ? null
+, # pass the list of supported systems
+  systems ? [ "x86_64-linux" ]
+}: null
+```
+
+#### Example
 
 Here is how it looks like in practice:
 
-[$ example/flake.nix](example/flake.nix) as nix
+[$ examples/simple-flake/flake.nix](examples/simple-flake/flake.nix) as nix
 ```nix
 {
   description = "Flake utils demo";
 
-  inputs.flake-utils.url = "github:numtide/flake-utils";
+  inputs.flake-utils.url = "github:numtide/flake-utils/simple-flake";
 
   outputs = { self, nixpkgs, flake-utils }:
-    flake-utils.lib.eachDefaultSystem (system:
-      let pkgs = nixpkgs.legacyPackages.${system}; in
-      rec {
-        packages.hello = pkgs.hello;
-        defaultPackage = packages.hello;
-        apps.hello = flake-utils.lib.mkApp { drv = packages.hello; };
-        defaultApp = apps.hello;
-      }
-    );
+    flake-utils.lib.simpleFlake {
+      inherit self nixpkgs;
+      name = "simple-flake";
+      overlay = ./overlay.nix;
+      shell = ./shell.nix;
+    };
 }
 ```
 
