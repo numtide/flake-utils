@@ -56,10 +56,21 @@ let
 
       # Flake expects a flat attrset containing only derivations as values
       packages = lib.flattenTree packages;
-    } // (if shell == null then { } else {
-      devShell = shell_ { inherit pkgs; };
-    })
+    }
+    //
+    (
+      if packages ? defaultPackage then {
+        defaultPackage = packages.defaultPackage;
+      } else { }
+    )
+    //
+    (
+      if shell != null then {
+        devShell = shell_ { inherit pkgs; };
+      } else if packages ? devShell then {
+        devShell = packages.devShell;
+      } else { }
+    )
   );
-
 in
 outputs
