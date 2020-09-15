@@ -75,7 +75,7 @@ eachSystem allSystems (system: { hello = 42; })
 }
 ```
 
-### `mkApp { drv, name ? drv.pname or drv.name, execPath ? drv.passthru.execPath or "/bin/${name}"`
+### `mkApp { drv, name ? drv.pname or drv.name, exePath ? drv.passthru.exePath or "/bin/${name}"`
 
 A small utility that builds the structure expected by the special `apps` and `defaultApp` prefixes.
 
