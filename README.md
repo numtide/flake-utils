@@ -33,7 +33,7 @@ Eg:
 
 ```nix
 eachSystem ["x86_64-linux"] (system: { hello = 42; })
-# => { hello.x86_64-linux.hello = 42; }
+# => { hello = { x86_64-linux = 42; }; }
 eachSystem allSystems (system: { hello = 42; })
 # => {
    hello.aarch64-darwin = 42,
