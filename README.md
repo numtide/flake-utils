@@ -143,7 +143,7 @@ Here is how it looks like in practice:
 {
   description = "Flake utils demo";
 
-  inputs.flake-utils.url = "github:numtide/flake-utils/simple-flake";
+  inputs.flake-utils.url = "github:numtide/flake-utils";
 
   outputs = { self, nixpkgs, flake-utils }:
     flake-utils.lib.simpleFlake {
