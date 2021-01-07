@@ -1,11 +1,4 @@
 let
-  # copied from <nixpkgs/lib>
-  genAttrs = names: f:
-    builtins.listToAttrs (map (n: { name = n; value = f n; }) names);
-
-  mapAttrsToList = f: attrs:
-    map (name: f name attrs.${name}) (builtins.attrNames attrs);
-
   # The list of systems supported by nixpkgs and hydra
   defaultSystems = [
     "aarch64-linux"
