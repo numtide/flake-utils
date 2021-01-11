@@ -142,8 +142,10 @@ let
 
           legacyPackages = packages;
 
-          # Flake expects a flat attrset containing only derivations as values
-          packages = lib.flattenTreeSystem system packages;
+          packages = lib.filterAttrs
+            # Filter on broken packages - you dont't want to expose them to the world
+            (_: drv: drv.meta.broken != true)
+            lib.flattenTreeSystem system packages;
         }
         // (
           if packages ? defaultPackage then {
