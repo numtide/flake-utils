@@ -93,6 +93,7 @@ let
 
         # standard modules
         # TODO: add isoImage & sdImage build targets, see: https://github.com/NixOS/nixpkgs/blob/72d906a0eafd089c90a6daab24ef344a79b00046/flake.nix#L56-L59
+        # TODO: add base substituters derived from the flake.nix file
         nixosModules' =
           externNixosModules
           ++ (if self ? "nixosModule" then [ self.nixosModule ] else [])
@@ -177,16 +178,11 @@ let
         pkgs = import nixpkgsOS {
           inherit config system;
           overlays =
-            (
+            externOverlays
+            ++ (
               if self ? "overlay" then [ self.overlay ] else []
             ) ++ (
-              # coincidentially correctly name spaced overlays in slef.overlays
-              # should not unexpectedly leak into self.packages:
-              # the only supported conventional way is via self.overlay (for packages)
-              # so don't uncomment the following line
-
-              # if self ? "overlays" then builtins.attrValues self.overlays else
-              []
+              if self ? "overlays" then builtins.attrValues self.overlays else []
             );
         };
 
