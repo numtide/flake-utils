@@ -72,7 +72,6 @@ let
         overlays' = let
           backportFromAlt' = maybeImport backportFromAlt;
           pkgsAlt = import nixpkgsAlt {
-            overlays = overlays_;
             inherit
               config
               system
