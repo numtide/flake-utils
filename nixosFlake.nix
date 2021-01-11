@@ -131,7 +131,7 @@ let
             ;
         };
 
-        packages = osPkgs.${name} or {};
+        packages = pkgs.${name} or {};
       in
         {
           nixosConfigurations =
