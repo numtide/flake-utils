@@ -143,7 +143,7 @@ let
           legacyPackages = packages;
 
           # Flake expects a flat attrset containing only derivations as values
-          packages = lib.flattenTree packages;
+          packages = lib.flattenTreeSystem system packages;
         }
         // (
           if packages ? defaultPackage then {
@@ -166,7 +166,7 @@ let
         # share non-name-spaced custom (mainly non packages) overlays (convention)
         // (
           if overlays != {} then {
-            overlays = maybeImportValues (lib.flattenTree (maybeImport overlays));
+            overlays = maybeImportValues (lib.flattenTreeSystem system (maybeImport overlays));
           } else {}
         )
         # share your primary (or only) nixos configurations as module
@@ -178,7 +178,7 @@ let
         # share your nixos configurations as modules
         // (
           if nixosModules != {} then {
-            nixosModules = maybeImportValues (lib.flattenTree (maybeImport nixosModules));
+            nixosModules = maybeImportValues (lib.flattenTreeSystem system (maybeImport nixosModules));
           } else {}
         )
         # share your primary (or only) devshell configurations as module
@@ -190,7 +190,7 @@ let
         # share your devshell configurations as modules
         // (
           if devshellModules != null then {
-            devshellModules = maybeImportValues (lib.flattenTree (maybeImport devshellModules));
+            devshellModules = maybeImportValues (lib.flattenTreeSystem system (maybeImport devshellModules));
           } else {}
         )
         # let others kick-start from your configuration
