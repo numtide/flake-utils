@@ -107,6 +107,11 @@ let
   #   }
   flattenTree = tree: import ./flattenTree.nix tree;
 
+  # It turns out that we also need to filter by the supported system. This is
+  # the same thing as able, but that also looks at meta.hydraPlatforms or
+  # meta.platforms if the former is undefined.
+  flattenTreeSystem = system: tree: import ./flattenTreeSystem.nix system tree;
+
   # Returns the structure used by `nix app`
   mkApp =
     { drv
@@ -128,6 +133,7 @@ let
       eachDefaultSystem
       eachSystem
       flattenTree
+      flattenTreeSystem
       mkApp
       simpleFlake
       ;

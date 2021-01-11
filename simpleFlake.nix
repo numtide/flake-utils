@@ -55,7 +55,7 @@ let
       legacyPackages = packages;
 
       # Flake expects a flat attrset containing only derivations as values
-      packages = lib.flattenTree packages;
+      packages = lib.flattenTreeSystem system packages;
     }
     //
     (
