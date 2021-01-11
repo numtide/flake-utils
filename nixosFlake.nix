@@ -12,7 +12,9 @@
 , # pass an instance of the nixpkgs flake for access to alternative package versions (eg. unstable)
   nixpkgsAlt ? null
 , # list of strings that represent a package path; pass either a list or a path to one
-  backportFromAlt ? []
+  backportPkgsFromAlt ? []
+, # list of strings that represent module paths; pass either a list or a path to one
+  backportModulesFromAlt ? []
 , # nixpkgs config for nixpkgsOS & nixpkgs-unstable
   config ? {}
 , # pass either an attribute set or a path to one
@@ -38,7 +40,7 @@
 , # maps to the devShell output. Pass in a shell.nix file or function.
   shell ? null
 , # pass the list of supported systems
-  systems ? [ "x86_64-linux" ]
+  systems ? [ "x86_64-linux" "aarch64-linux" ]
 }:
 let
   maybeImportValues = flatAttrSet:
@@ -51,70 +53,18 @@ let
       obj
   ;
 
+
   exports = {
-    # let others kick-start from your configuration
-    templates."${name}" = {
-      path = self;
-      description = "template based on ${name}'s configuration";
-    };
-    defaultTemplate = self.templates.${name};
-  }
-  # share your name-spaced (mainly) custom packages as overlay (convention)
-  // (
-    if overlay != null then {
-      overlay = maybeImport overlay;
-    } else {}
-  )
-  # share non-name-spaced custom (mainly non packages) overlays (convention)
-  // (
-    if overlays != {} then {
-      overlays = maybeImportValues (lib.flattenTree (maybeImport overlays));
-    } else {}
-  )
-  # share your primary (or only) nixos configurations as module
-  // (
-    if nixosModule != null then {
-      nixosModule = maybeImport nixosModule;
-    } else {}
-  )
-  # share your nixos configurations as modules
-  // (
-    if nixosModules != {} then {
-      nixosModules = maybeImportValues (lib.flattenTree (maybeImport nixosModules));
-    } else {}
-  )
-  # share your primary (or only) devshell configurations as module
-  // (
-    if devshellModule != null then {
-      devshellModule = maybeImport devshellModule;
-    } else {}
-  )
-  # share your devshell configurations as modules
-  // (
-    if devshellModules != null then {
-      devshellModules = maybeImportValues (lib.flattenTree (maybeImport devshellModules));
-    } else {}
-  );
-
-  outputs = lib.eachSystem systems (
-    system:
+    nixosConfigurations =
       let
-        nixosModules' =
-          externNixosModules
-          ++ (if self ? "nixosModule" then [ self.nixosModule ] else [])
-          ++ (if self ? "nixosModules" then builtins.attrValues self.nixosModules else [])
-        ;
-
-        devshellModules' =
-          externDevshellModules
-          ++ (if self ? "devshellModule" then [ self.devshellModule ] else [])
-          ++ (if self ? "devshellModules" then builtins.attrValues self.devshellModules else [])
-        ;
+        # TODO: does flattenTree produce legal hostnames?
+        hosts' = maybeImportValues (lib.flattenTree (maybeImport hosts));
 
         overlays' =
           externOverlays
           ++ (if self ? "overlay" then [ self.overlay ] else [])
           ++ (if self ? "overlays" then builtins.attrValues self.overlays else [])
+          # pull in package backports
           ++ (
             let
               resolveKey = pkgs: key:
@@ -124,55 +74,139 @@ let
                 in
                   builtins.foldl' op pkgs attrs
               ;
-              resolveOverlay = pkgs: pkgKey: final: prev: {
-                pkgKey = resolveKey pkgs pkgKey;
+              resolveOverlay = pkgKey: final: prev: {
+                pkgKey = let
+                  pkgs = import nixpkgsAlt {
+                    inherit config;
+                    localSystem = prev.stdenv.buildPlatform;
+                    crossSystem = prev.stdenv.hostPlatform;
+                    # no overlays on nixpkgsAlt: nixpkgsOS ones might not be compatible
+                  };
+                in
+                  resolveKey pkgs pkgKey;
               };
+              backportPkgsFromAlt' = maybeImport backportPkgsFromAlt;
             in
-              let
-                backportFromAlt' = maybeImport backportFromAlt;
-                pkgsAlt = import nixpkgsAlt {
-                  inherit
-                    config
-                    system
-                    ;
-                };
-              in
-                map resolveOverlay pkgsAlt backportFromAlt'
+              map resolveOverlay backportPkgsFromAlt'
           )
         ;
 
+        # standard modules
+        # TODO: add isoImage & sdImage build targets, see: https://github.com/NixOS/nixpkgs/blob/72d906a0eafd089c90a6daab24ef344a79b00046/flake.nix#L56-L59
+        nixosModules' =
+          externNixosModules
+          ++ (if self ? "nixosModule" then [ self.nixosModule ] else [])
+          ++ builtins.removeAttrs
+            (if self ? "nixosModules" then builtins.attrValues self.nixosModules else [])
+            # profiles have special meaning & are activated per host so remove them here
+            [ "profiles" ]
+        ;
+        globalModule = { config, ... }: {
+          networking.hostName = hostName;
+          nixpkgs.overlays = overlays';
+          nixpkgs.config = config;
+          nixpkgs.pkgs = import nixpkgsOS { inherit (config.nixpkgs) config overlays localSystem crossSystem; };
+          nix.nixPath = [ "nixos-unstable=${nixpkgsAlt}" "nixpkgs=${nixpkgsOS}" ];
+          nix.registry = { nixpkgsAlt.flake = nixpkgsAlt; nixpkgs.flake = nixpkgsOS; };
+          system.configurationRevision = lib.mkIf (self ? rev) self.rev;
+        };
+        backportsModule = { config, altModulesPath, ... }: {
+          disabledModules = backportModulesFromAlt;
+          imports = map (path: "${altModulesPath}/${path}") backportModulesFromAlt;
+        };
+
+      in
+        let
+          configure = hostName: configurationModule:
+            lib.nixosSystem {
+              specialArgs = {} // (
+                # so that we can easily pull in modules from nixpkgsAlt, see backportsModule above
+                if nixpkgsAlt != null then { altModulesPath = "${nixpkgsAlt}/nixos/modules"; } else {}
+              );
+              modules =
+                nixosModules'
+                ++ [ globalModule configurationModule ]
+                ++ (if nixpkgsAlt != null then [ backportsModule ] else []);
+            };
+        in
+          builtins.mapAttrs (hn: cfg: configure hn cfg) hosts';
+
+    # let others kick-start from your configuration
+    templates."${name}" = {
+      path = self;
+      description = "template based on ${name}'s configuration";
+    };
+    defaultTemplate = self.templates.${name};
+  } // (
+    # share your name-spaced (mainly) custom packages as overlay (convention)
+    if overlay == null then {} else {
+      overlay = maybeImport overlay;
+    }
+  ) // (
+    # share non-name-spaced custom (mainly non packages) overlays (convention)
+    if overlays == {} then {} else {
+      overlays = maybeImportValues (lib.flattenTree (maybeImport overlays));
+    }
+  ) // (
+    # share your primary (or only) nixos configurations as module
+    if nixosModule == null then {} else {
+      nixosModule = maybeImport nixosModule;
+    }
+  ) // (
+    # share your nixos configurations as modules
+    if nixosModules == {} then {} else {
+      nixosModules = maybeImportValues (lib.flattenTree (maybeImport nixosModules));
+    }
+  ) // (
+    # share your primary (or only) devshell configurations as module
+    if devshellModule == null then {} else {
+      devshellModule = maybeImport devshellModule;
+    }
+  ) // (
+    # share your devshell configurations as modules
+    if devshellModules == null then {} else {
+      devshellModules = maybeImportValues (lib.flattenTree (maybeImport devshellModules));
+    }
+  );
+
+
+  outputs = lib.eachSystem systems (
+    system:
+      let
+
         pkgs = import nixpkgsOS {
-          overlays = overlays';
-          inherit
-            config
-            system
-            ;
+          inherit config system;
+          overlays =
+            (
+              if self ? "overlay" then [ self.overlay ] else []
+            ) ++ (
+              # coincidentially correctly name spaced overlays in slef.overlays
+              # should not unexpectedly leak into self.packages:
+              # the only supported conventional way is via self.overlay (for packages)
+              # so don't uncomment the following line
+
+              # if self ? "overlays" then builtins.attrValues self.overlays else
+              []
+            );
         };
 
         packages = pkgs.${name} or {};
+
       in
         {
-          nixosConfigurations =
-            maybeImportValues (lib.flattenTree (maybeImport hosts))
-              (
-                recursiveUpdate inputs {
-                  inherit lib pkgs system utils externModules;
-                }
-              );
 
           legacyPackages = packages;
 
-          packages = lib.filterAttrs
-            # Filter on broken packages - you dont't want to expose them to the world
-            (_: drv: drv.meta.broken != true)
-            lib.flattenTreeSystem system packages;
+          # Filter on broken packages - we dont't want to expose them to the world
+          packages = lib.filterAttrs (_: drv: drv.meta.broken != true) (lib.flattenTreeSystem system packages);
+
         } // (
           if packages ? defaultPackage then {
             defaultPackage = packages.defaultPackage;
           } else {}
         ) // (
           if shell != null then {
-            devShell = maybeImport shell { inherit pkgs; };
+            devShell = maybeImport shell { inherit pkgs; devshellModules = externDevshellModules; };
           } else if packages ? devShell then {
             devShell = packages.devShell;
           } else {}
