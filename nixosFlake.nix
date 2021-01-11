@@ -207,5 +207,5 @@ let
             devShell = packages.devShell;
           } else {}
         )
-    in
-    outputs // exports
+  );
+in outputs // exports
