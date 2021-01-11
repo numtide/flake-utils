@@ -206,6 +206,6 @@ let
           } else if packages ? devShell then {
             devShell = packages.devShell;
           } else {}
-        );
+        )
     in
     outputs // exports
