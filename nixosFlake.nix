@@ -53,43 +53,44 @@ let
       obj
   ;
 
+  # used in, both, exports for hosts & outputs for deriving name spaced packages / the shell
+  overlays' =
+    externOverlays
+    ++ (if self ? "overlay" then [ self.overlay ] else [])
+    ++ (if self ? "overlays" then builtins.attrValues self.overlays else [])
+    # pull in package backports
+    ++ (
+      let
+        resolveKey = pkgs: key:
+          let
+            attrs = builtins.filter builtins.isString (builtins.split "\\." key);
+            op = sum: attr: sum.${attr} or (throw "package \"${key}\" not found");
+          in
+            builtins.foldl' op pkgs attrs
+        ;
+        resolveOverlay = pkgKey: final: prev: {
+          pkgKey = let
+            pkgs = import nixpkgsAlt {
+              inherit config;
+              localSystem = prev.stdenv.buildPlatform;
+              crossSystem = prev.stdenv.hostPlatform;
+              # no overlays on nixpkgsAlt: nixpkgsOS ones might not be compatible
+            };
+          in
+            resolveKey pkgs pkgKey;
+        };
+        backportPkgsFromAlt' = maybeImport backportPkgsFromAlt;
+      in
+        map resolveOverlay backportPkgsFromAlt'
+    )
+  ;
+
 
   exports = {
     nixosConfigurations =
       let
         # TODO: does flattenTree produce legal hostnames?
         hosts' = maybeImportValues (lib.flattenTree (maybeImport hosts));
-
-        overlays' =
-          externOverlays
-          ++ (if self ? "overlay" then [ self.overlay ] else [])
-          ++ (if self ? "overlays" then builtins.attrValues self.overlays else [])
-          # pull in package backports
-          ++ (
-            let
-              resolveKey = pkgs: key:
-                let
-                  attrs = builtins.filter builtins.isString (builtins.split "\\." key);
-                  op = sum: attr: sum.${attr} or (throw "package \"${key}\" not found");
-                in
-                  builtins.foldl' op pkgs attrs
-              ;
-              resolveOverlay = pkgKey: final: prev: {
-                pkgKey = let
-                  pkgs = import nixpkgsAlt {
-                    inherit config;
-                    localSystem = prev.stdenv.buildPlatform;
-                    crossSystem = prev.stdenv.hostPlatform;
-                    # no overlays on nixpkgsAlt: nixpkgsOS ones might not be compatible
-                  };
-                in
-                  resolveKey pkgs pkgKey;
-              };
-              backportPkgsFromAlt' = maybeImport backportPkgsFromAlt;
-            in
-              map resolveOverlay backportPkgsFromAlt'
-          )
-        ;
 
         # standard modules
         # TODO: add isoImage & sdImage build targets, see: https://github.com/NixOS/nixpkgs/blob/72d906a0eafd089c90a6daab24ef344a79b00046/flake.nix#L56-L59
@@ -177,15 +178,10 @@ let
 
         pkgs = import nixpkgsOS {
           inherit config system;
-          overlays =
-            externOverlays
-            ++ (
-              if self ? "overlay" then [ self.overlay ] else []
-            ) ++ (
-              if self ? "overlays" then builtins.attrValues self.overlays else []
-            );
+          overlays = overlays';
         };
 
+        # only expose name spaced overlay packages -- good citizenship convention
         packages = pkgs.${name} or {};
 
       in
@@ -203,9 +199,13 @@ let
         ) // (
           if shell != null then {
             devShell = maybeImport shell { inherit pkgs; devshellModules = externDevshellModules; };
+            # we'll have all overlays and overrides available here in pkgs
           } else if packages ? devShell then {
+            # so do we here, btw
             devShell = packages.devShell;
           } else {}
         )
   );
-in outputs // exports
+in
+
+outputs // exports
