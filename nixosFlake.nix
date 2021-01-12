@@ -53,6 +53,13 @@ let
       obj
   ;
 
+  # used in, both, exports for specialArgs to the module system & outputs for the shell
+  devshellModules' =
+    externDevshellModules
+    ++ (if self ? "devshellModule" then [ self.devshellModule ] else [])
+    ++ (if self ? "devshellModules" then builtins.attrValues self.devshellModules else [])
+  ;
+
   # used in, both, exports for hosts & outputs for deriving name spaced packages / the shell
   overlays' =
     externOverlays
@@ -124,6 +131,8 @@ let
               specialArgs = {} // (
                 # so that we can easily pull in modules from nixpkgsAlt, see backportsModule above
                 if nixpkgsAlt != null then { altModulesPath = "${nixpkgsAlt}/nixos/modules"; } else {}
+                  # have access to devshell modules in profiles
+                  devshellModules = devshellModules';
               );
               modules =
                 nixosModules'
@@ -198,8 +207,8 @@ let
           } else {}
         ) // (
           if shell != null then {
-            devShell = maybeImport shell { inherit pkgs; devshellModules = externDevshellModules; };
             # we'll have all overlays and overrides available here in pkgs
+            devShell = maybeImport shell { inherit pkgs; devshellModules = devshellModules'; };
           } else if packages ? devShell then {
             # so do we here, btw
             devShell = packages.devShell;
