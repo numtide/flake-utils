@@ -13,10 +13,13 @@
   outputs = inputs@{ self, home, nixpkgsOS, nixpkgsAlt, flake-utils, nur, devshell }:
     flake-utils.lib.nixosFlake {
       inherit self nixpkgsOS nixpkgsAlt;
-      backportFromAlt = [
-        "manix" # currently only exists on master
+      altPkgsOverlay = altPkgs: final: prev: {
+        manix = altPkgs.manix; # currently only exists on master
+      }
+      altPkgsModules = [
+        # "services/misc/tty/getty.nix" # would not actually work for this particular module
       ];
-      name = "nixos-flake"; # use github user name
+      name = "nixos-flake";                     # use github user name
       shell = ./shell.nix;
       hosts = ./hosts.nix;                      # can be path or function
 
@@ -30,7 +33,7 @@
       nixosModules = ./modules;                 # can be path or attrset
       devshellModule = ./shells/main.nix;       # can be path or function
       devshellModules = {                       # can be path or attrset
-        python = { # will be flattend
+        python = {                              # will be flattend
           frontend = ./shells/py-frontend.nix;  # can be path or function
           backend = ./shells/py-backend.nix;    # can be path or function
         };
