@@ -97,7 +97,7 @@ let
   lib = lib.extend (
     final: prev: {
       nixosSystemExtended = { modules, ... } @ args:
-        lib.nixosSystem  args // {
+        lib.nixosSystem (args // {
             modules =
               let
                 isoConfig = (
