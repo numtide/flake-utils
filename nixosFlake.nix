@@ -12,9 +12,9 @@
 , # pass an instance of the nixpkgs flake for access to alternative package versions (eg. unstable)
   nixpkgsAlt ? null
 , # list of strings that represent a package path; pass either a list or a path to one
-  backportPkgsFromAlt ? (altPkgs: final: prev: {})
+  altPkgsOverlay ? (altPkgs: final: prev: {})
 , # list of strings that represent module paths; pass either a list or a path to one
-  backportModulesFromAlt ? []
+  altPkgsModules ? []
 , # nixpkgs config for nixpkgsOS & nixpkgs-unstable
   config ? {}
 , # pass either an attribute set or a path to one
@@ -68,7 +68,7 @@ let
     # pull in package backports
     ++ (
       let
-        backportPkgsFromAlt' = maybeImport backportPkgsFromAlt;
+        altPkgsOverlay' = maybeImport altPkgsOverlay;
       in
         [
           final: prev:
@@ -80,7 +80,7 @@ let
                 # no overlays on nixpkgsAlt: nixpkgsOS ones might not be compatible
               };
             in
-              backportPkgsFromAlt' altPkgs final prev
+              altPkgsOverlay' altPkgs final prev
         ]
     );
 
@@ -170,9 +170,9 @@ let
           nix.registry = { nixpkgsAlt.flake = nixpkgsAlt; nixpkgs.flake = nixpkgsOS; };
           system.configurationRevision = lib.mkIf (self ? rev) self.rev;
         };
-        backportsModule = { config, altModulesPath, ... }: {
-          disabledModules = backportModulesFromAlt;
-          imports = map (path: "${altModulesPath}/${path}") backportModulesFromAlt;
+        altPkgsModulesModule = { config, altPkgsModulesPath, ... }: {
+          disabledModules = altPkgsModules;
+          imports = map (path: "${altPkgsModulesPath}/${path}") altPkgsModules;
         };
 
       in
@@ -183,13 +183,13 @@ let
                 # have access to devshell modules in profiles
                 devshellModules = devshellModules';
               } // (
-                # so that we can easily pull in modules from nixpkgsAlt, see backportsModule above
-                if nixpkgsAlt != null then { altModulesPath = "${nixpkgsAlt}/nixos/modules"; } else {}
+                # so that we can easily pull in modules from nixpkgsAlt, see altPkgsModulesModule above
+                if nixpkgsAlt != null then { altPkgsModulesPath = "${nixpkgsAlt}/nixos/modules"; } else {}
               );
               modules =
                 nixosModules'
                 ++ [ globalModule configurationModule ]
-                ++ (if nixpkgsAlt != null then [ backportsModule ] else [])
+                ++ (if nixpkgsAlt != null then [ altPkgsModulesModule ] else [])
               ;
             };
         in
