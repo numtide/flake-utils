@@ -94,6 +94,52 @@ let
     )
   ;
 
+  lib = lib.extend (
+    final: prev: {
+      nixosSystemExtended = { modules, ... } @ args:
+        lib.nixosSystem  args // {
+            modules =
+              let
+                isoConfig = (
+                  import (nixpkgsOS + "/nixos/lib/eval-config.nix")
+                    (
+                      args // {
+                        modules = modules ++ [
+                          (nixpkgsOS + "/installer/cd-dvd/installation-cd-minimal-new-kernel.nix")
+                          {
+                            isoImage.imageBaseName = "nixos-" + config.networking.hostName;
+                          }
+                        ];
+                      }
+                    )
+                ).config;
+
+                sdConfig = (
+                  import (nixpkgsOS + "/nixos/lib/eval-config.nix")
+                    (
+                      args // {
+                        modules = modules ++ [
+                          (nixpkgsOS + "/installer/cd-dvd/sd-image-aarch64-new-kernel.nix")
+                          { config, ... }: {
+                            sdImage.imageBaseName = "nixos-sd-" + config.networking.hostName;
+                          }
+                        ];
+                      }
+                    )
+                ).config;
+              in
+                modules ++ [
+                  {
+                    system.build = {
+                      iso = isoConfig.system.build.isoImage;
+                      sd = sdConfig.system.build.sdImage;
+                    };
+                  }
+                ];
+          }
+        );
+    }
+  );
 
   exports = {
 
@@ -103,7 +149,6 @@ let
         hosts' = maybeImportValues (lib.flattenTree (maybeImport hosts));
 
         # standard modules
-        # TODO: add isoImage & sdImage build targets, see: https://github.com/NixOS/nixpkgs/blob/72d906a0eafd089c90a6daab24ef344a79b00046/flake.nix#L56-L59
         # TODO: add base substituters derived from the flake.nix file
         nixosModules' =
           externNixosModules
@@ -130,7 +175,7 @@ let
       in
         let
           configure = hostName: configurationModule:
-            lib.nixosSystem {
+            lib.nixosSystemExtended {
               specialArgs = {
                 # have access to devshell modules in profiles
                 devshellModules = devshellModules';
@@ -243,5 +288,4 @@ let
         )
   );
 in
-
 outputs // exports
