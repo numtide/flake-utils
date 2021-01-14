@@ -127,12 +127,25 @@ let
                       }
                     )
                 ).config;
+
+                netbootConfig = (
+                  import (nixpkgsOS + "/nixos/lib/eval-config.nix")
+                    (
+                      args // {
+                        modules = modules ++ [
+                          (nixpkgsOS + "/installer/netboot/netboot-minimal.nix")
+                        ];
+                      }
+                    )
+                ).config;
               in
                 modules ++ [
                   {
                     system.build = {
                       iso = isoConfig.system.build.isoImage;
                       sd = sdConfig.system.build.sdImage;
+                      netbootRamdisk = netbootConfig.system.build.netbootRamdisk;
+                      netbootIpxeScript = netbootConfig.system.build.netbootIpxeScript;
                     };
                   }
                 ];
