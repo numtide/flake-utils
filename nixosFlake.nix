@@ -12,7 +12,7 @@
 , # pass an instance of the nixpkgs flake for access to alternative package versions (eg. unstable)
   nixpkgsAlt ? null
 , # list of strings that represent a package path; pass either a list or a path to one
-  backportPkgsFromAlt ? []
+  backportPkgsFromAlt ? (altPkgs: final: prev: {})
 , # list of strings that represent module paths; pass either a list or a path to one
   backportModulesFromAlt ? []
 , # nixpkgs config for nixpkgsOS & nixpkgs-unstable
@@ -68,31 +68,21 @@ let
     # pull in package backports
     ++ (
       let
-        resolveOverlay = let
-          resolveKey = pkgs: key:
+        backportPkgsFromAlt' = maybeImport backportPkgsFromAlt;
+      in
+        [
+          final: prev:
             let
-              attrs = builtins.filter builtins.isString (builtins.split "\\." key);
-              op = sum: attr: sum.${attr} or (throw "package \"${key}\" not found");
-            in
-              builtins.foldl' op pkgs attrs
-          ;
-        in
-          pkgKey: final: prev: {
-            pkgKey = let
-              pkgs = import nixpkgsAlt {
+              altPkgs = import nixpkgsAlt {
                 inherit config;
                 localSystem = prev.stdenv.buildPlatform;
                 crossSystem = prev.stdenv.hostPlatform;
                 # no overlays on nixpkgsAlt: nixpkgsOS ones might not be compatible
               };
             in
-              resolveKey pkgs pkgKey;
-          };
-        backportPkgsFromAlt' = maybeImport backportPkgsFromAlt;
-      in
-        map resolveOverlay backportPkgsFromAlt'
-    )
-  ;
+              backportPkgsFromAlt' altPkgs final prev
+        ]
+    );
 
   lib = lib.extend (
     final: prev: {
