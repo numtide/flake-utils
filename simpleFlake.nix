@@ -52,10 +52,8 @@ let
       packages = pkgs.${name} or { };
     in
     {
+      # Use the legacy packages since it's more forgiving.
       legacyPackages = packages;
-
-      # Flake expects a flat attrset containing only derivations as values
-      packages = lib.flattenTree packages;
     }
     //
     (
