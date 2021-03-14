@@ -70,7 +70,9 @@ let
           op = attrs: key:
             attrs //
             {
-              ${key} = (attrs.${key} or { }) // { ${system} = ret.${key}; };
+              ${key} = (attrs.${key} or { }) // {
+                ${system} = ret.${key};
+              } // (ret.${key}.generic or { });
             }
           ;
         in
