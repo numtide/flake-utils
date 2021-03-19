@@ -25,6 +25,8 @@ eachSystem (defaultSystems ++ ["armv7l-linux"]) (system: { hello = 42; })
 
 ### `eachSystem -> [<system>] -> (<system> -> attrs)`
 
+Alternative usage: `eachSystem -> [<system>] -> { generic = attrs; callback = (<system> -> attrs); }`
+
 A common case is to build the same structure for each system. Instead of
 building the hierarchy manually or per prefix, iterate over each systems and
 then re-build the hierarchy.
@@ -47,6 +49,8 @@ eachSystem allSystems (system: { hello = 42; })
 ```
 
 ### `eachDefaultSystem -> (<system> -> attrs)`
+
+Alternative usage: `eachDefaultSystem -> { generic = attrs; callback = (<system> -> attrs); }`
 
 `eachSystem` pre-populated with `defaultSystems`.
 
@@ -164,4 +168,3 @@ warning: unknown flake output 'lib'
 
 nixpkgs is currently having the same issue so I assume that it will be
 eventually standardized.
-
