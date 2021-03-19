@@ -64,21 +64,33 @@ let
   #
   eachSystem = systems: f:
     let
-      op = attrs: system:
+      generic =
+        if builtins.typeOf f == "set" then
+          f.generic
+        else
+          { }
+      ;
+
+      callback =
+        if builtins.typeOf f == "set" then
+          f.callback
+        else
+          f
+      ;
+
+      foldTopLevel = attrs: system:
         let
-          ret = f system;
-          op = attrs: key:
+          ret = callback system;
+          foldSystems = attrs: key:
             attrs //
             {
-              ${key} = (attrs.${key} or { }) // {
-                ${system} = ret.${key};
-              } // (ret.${key}.generic or { });
+              ${key} = (attrs.${key} or { }) // (generic.${key} or { }) // { ${system} = ret.${key}; };
             }
           ;
         in
-        builtins.foldl' op attrs (builtins.attrNames ret);
+        builtins.foldl' foldSystems attrs (builtins.attrNames ret);
     in
-    builtins.foldl' op { } systems
+    builtins.foldl' foldTopLevel { } systems
   ;
 
   # Nix flakes insists on having a flat attribute set of derivations in
