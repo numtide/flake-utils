@@ -4,11 +4,7 @@ let
     let
       pathStr = builtins.concatStringsSep "/" path;
     in
-    if (builtins.typeOf val) != "set" then
-    # ignore that value
-    # builtins.trace "${pathStr} is not of type set"
-      sum
-    else if val ? type && val.type == "derivation" then
+    if isDerivation val then
     # builtins.trace "${pathStr} is a derivation"
     # we used to use the derivation outPath as the key, but that crashes Nix
     # so fallback on constructing a static key
@@ -24,6 +20,9 @@ let
     # builtins.trace "${pathStr} is something else"
       sum
   ;
+
+  isAttrs = builtins.isAttrs or (builtins.typeOf val) != "set";
+  isDerivation = x: isAttrs x && x ? type && x.type == "derivation";
 
   recurse = sum: path: val:
     builtins.foldl'
