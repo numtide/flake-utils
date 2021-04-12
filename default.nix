@@ -100,6 +100,27 @@ let
   #   }
   flattenTree = tree: import ./flattenTree.nix tree;
 
+  # Nix check functionality validates packages for various conditions, like if
+  # they build for any given platform or if they are marked broken.
+  #
+  # This function filters a flattend package set for conditinos that
+  # would *trivially* break `nix flake check`. It does not flatten a tree and it
+  # does not implement advanced package validation checks.
+  #
+  # Eg:
+  #
+  #   filterPackages "x86_64-linux" {
+  #     hello = pkgs.hello;
+  #     "gitAndTools/git" = pkgs.gitAndTools // {meta.broken = true;};
+  #    };
+  #
+  # Returns:
+  #
+  #   {
+  #      hello = «derivation»;
+  #   }
+  filterPackages = system: packages: import ./filterPackages.nix system packages;
+
   # Returns the structure used by `nix app`
   mkApp =
     { drv
