@@ -13,7 +13,8 @@ let
     );
 
   # Everything that nix flake check requires for the packages output
-  sieve = (n: v: with v;
+  sieve = n: v:
+    with v;
     let
       inherit (builtins) isAttrs;
       isDerivation = x: isAttrs x && x ? type && x.type == "derivation";
