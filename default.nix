@@ -60,24 +60,28 @@ let
   eachDefaultSystem = eachSystem defaultSystems;
 
   # Builds a map from <attr>=value to <system>.<attr>=value for each system.
-  #
-  #
   eachSystem = systems: f:
     let
-      op = attrs: system:
+      x = { generic ? { }, callback ? system: { } }:
         let
-          ret = f system;
-          op = attrs: key:
-            attrs //
-            {
-              ${key} = (attrs.${key} or { }) // { ${system} = ret.${key}; };
-            }
-          ;
+          foldTopLevel = attrs: system:
+            let
+              ret = callback system;
+              foldSystems = attrs: key:
+                attrs //
+                {
+                  ${key} = (attrs.${key} or { }) // { ${system} = ret.${key}; };
+                }
+              ;
+            in
+            builtins.foldl' foldSystems attrs (builtins.attrNames ret);
         in
-        builtins.foldl' op attrs (builtins.attrNames ret);
+        (builtins.foldl' foldTopLevel { } systems) // generic;
     in
-    builtins.foldl' op { } systems
-  ;
+    if builtins.typeOf f == "set" then
+      x f
+    else
+      x { callback = f; };
 
   # Nix flakes insists on having a flat attribute set of derivations in
   # various places like the `packages` and `checks` attributes.
