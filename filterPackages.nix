@@ -23,6 +23,6 @@ let
       # check for isDerivation, so this is independently useful of
       # flattenTree, which also does filter on derviations
       isDerivation v && !meta.broken && builtins.elem system platforms
-  );
+  ;
 in
 filterAttrs sieve packages
