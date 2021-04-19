@@ -59,7 +59,7 @@ let
   # eachSystem using defaultSystems
   eachDefaultSystem = eachSystem defaultSystems;
 
-  # Builds a map from <attr>=value to <system>.<attr>=value for each system.
+  # Builds a map from <attr>=value to <attr>.<system>=value for each system.
   #
   #
   eachSystem = systems: f:
