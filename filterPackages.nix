@@ -1,7 +1,7 @@
 system: packages:
 let
   # Adopted from nixpkgs.lib
-  inherit (builtins) listToAttrs concatMap attrName;
+  inherit (builtins) listToAttrs concatMap attrNames;
   nameValuePair = name: value: { inherit name value; };
   filterAttrs = pred: set:
     listToAttrs (
