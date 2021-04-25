@@ -142,6 +142,7 @@ let
       eachDefaultSystem
       eachSystem
       flattenTree
+      filterPackages
       mkApp
       simpleFlake
       ;
