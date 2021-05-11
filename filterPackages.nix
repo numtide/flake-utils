@@ -1,3 +1,4 @@
+{ allSystems }:
 system: packages:
 let
   # Adopted from nixpkgs.lib
@@ -18,11 +19,12 @@ let
     let
       inherit (builtins) isAttrs;
       isDerivation = x: isAttrs x && x ? type && x.type == "derivation";
-      platforms = meta.hydraPlatforms or meta.platforms or [ ];
+      isBroken = meta.broken or false;
+      platforms = meta.hydraPlatforms or meta.platforms or allSystems;
     in
       # check for isDerivation, so this is independently useful of
       # flattenTree, which also does filter on derviations
-      isDerivation v && !meta.broken && builtins.elem system platforms
+      isDerivation v && !isBroken && builtins.elem system platforms
   ;
 in
 filterAttrs sieve packages

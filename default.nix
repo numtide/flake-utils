@@ -119,7 +119,7 @@ let
   #   {
   #      hello = «derivation»;
   #   }
-  filterPackages = system: packages: import ./filterPackages.nix system packages;
+  filterPackages = import ./filterPackages.nix { inherit allSystems; };
 
   # Returns the structure used by `nix app`
   mkApp =
