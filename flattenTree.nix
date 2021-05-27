@@ -21,7 +21,7 @@ let
       sum
   ;
 
-  isAttrs = builtins.isAttrs or (builtins.typeOf val) != "set";
+  isAttrs = builtins.isAttrs or (builtins.typeOf val) == "set";
   isDerivation = x: isAttrs x && x ? type && x.type == "derivation";
 
   recurse = sum: path: val:
