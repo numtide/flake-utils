@@ -1,6 +1,8 @@
 # flake-utils
 
-**STATUS: alpha**
+[![Support room on Matrix](https://img.shields.io/matrix/flake-utils:numtide.com.svg?label=%23flake-utils%3Anumtide.com&logo=matrix&server_fqdn=matrix.numtide.com)](https://matrix.to/#/#flake-utils:numtide.com)
+
+**STATUS: stable**
 
 Pure Nix flake utility functions.
 
