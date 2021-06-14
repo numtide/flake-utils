@@ -6,8 +6,9 @@ let
     inherit name system;
     builder = "/bin/sh";
     args = [ "-c" command ];
-   };
-in {
+  };
+in
+{
 
   isEqual = a: b:
     if a == b
