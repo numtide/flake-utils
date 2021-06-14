@@ -9,6 +9,10 @@ let
   };
 in
 {
+  hasBuilt = d:
+    if (builtins.tryEval ( builtins.pathExists d)).success
+    then test "SUCCESS__${str d.name}__HAS_BUILT" "echo success > $out"
+    else test "FAILURE__${str d.name}__HAS_NOT_BUILT" "exit 1";
 
   isEqual = a: b:
     if a == b
