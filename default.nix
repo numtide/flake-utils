@@ -135,14 +135,18 @@ let
   # This function tries to capture a common flake pattern.
   simpleFlake = import ./simpleFlake.nix { inherit lib; };
 
+  # Helper functions for Nix evaluation
+  check-utils = import ./check-utils.nix;
+
   lib = {
     inherit
       allSystems
+      check-utils
       defaultSystems
       eachDefaultSystem
       eachSystem
-      flattenTree
       filterPackages
+      flattenTree
       mkApp
       simpleFlake
       ;
