@@ -7,7 +7,7 @@
     flake-utils.lib.eachDefaultSystem (system:
       let
         inherit (flake-utils.lib.check-utils system) isEqual hasKey;
-        testDataset = { key1 = "value1"; key2 = 123; key3 = "some>value<with^invalid&characters"; };
+        testDataset = { key1 = "value1"; key2 = 123; key3 = "some>value with^invalid&characters"; };
       in
       rec {
         checks = {
