@@ -7,22 +7,23 @@
     flake-utils.lib.eachDefaultSystem (system:
       let
         inherit (flake-utils.lib.check-utils system) isEqual hasKey;
-
-        testDataset = { key1 = "value1"; key2 = "value2"; key3 = "value3"; };
+        testDataset = { key1 = "value1"; key2 = 123; key3 = "some>value with^invalid&characters"; };
       in
       rec {
         checks = {
-          valid_key1 = isEqual testDataset.key1 "value1";
-          contains_key2 = hasKey testDataset "key2";
+          # Successful cases
+          success_isEqual = isEqual testDataset.key1 "value1";
+          success_hasKey = hasKey testDataset "key2";
 
-          failing_valid_key1 = isEqual testDataset.key1 "failing-data";
-          failing_contains_key2 = hasKey testDataset "failing-data";
+          # Failing cases
+          failure_isEqual = isEqual testDataset.key1 "failing-data";
+          failure_hasKey = hasKey testDataset "failing-data";
 
-          number_formatting_isEqual = isEqual testDataset.key1 123;
-          number_formatting_hasKey = hasKey testDataset 123;
+          # Formatting
+          formatting_number = isEqual testDataset.key2 123;
+          formatting_null = isEqual null null;
+          formatting_invalid_chars = isEqual testDataset.key3 "some>value with^invalid&characters";
 
-          null_formatting_key1 = isEqual testDataset.key1 null;
-          null_formatting_hasKey = hasKey testDataset null;
         };
       }
     );
