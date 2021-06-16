@@ -3,9 +3,10 @@ let
   op = sum: path: val:
     let
       pathStr = builtins.concatStringsSep "/" path;
+      tryCheckSet = builtins.tryEval ((builtins.typeOf val) == "set");
     in
-    if (builtins.typeOf val) != "set" then
-    # ignore that value
+    if !tryCheckSet.value then
+    # ignore anything thats not a set or throws an error
     # builtins.trace "${pathStr} is not of type set"
       sum
     else if val ? type && val.type == "derivation" then
