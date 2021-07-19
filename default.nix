@@ -5,6 +5,7 @@ let
     "i686-linux"
     "x86_64-darwin"
     "x86_64-linux"
+    "aarch64-darwin"
   ];
 
   # List of all systems defined in nixpkgs
