@@ -60,8 +60,9 @@ let
   # eachSystem using defaultSystems
   eachDefaultSystem = eachSystem defaultSystems;
 
-  # Builds a map from <attr>=value to <attr>.<system>=value for each system.
-  #
+  # Builds a map from <attr>=value to <attr>.<system>=value for each system,
+  # except for the `hydraJobs` attribute, where it maps the inner attributes,
+  # from hydraJobs.<attr>=value to hydraJobs.<attr>.<system>=value.
   #
   eachSystem = systems: f:
     let
@@ -71,7 +72,9 @@ let
           op = attrs: key:
             attrs //
             {
-              ${key} = (attrs.${key} or { }) // { ${system} = ret.${key}; };
+              ${key} = (attrs.${key} or { }) // (if key == "hydraJobs"
+              then builtins.mapAttrs (name: value: (attrs.hydraJobs.${name} or { }) // { ${system} = value; }) ret.hydraJobs
+              else { ${system} = ret.${key}; });
             }
           ;
         in
