@@ -120,6 +120,9 @@ let
     in
     builtins.foldl' op { } systems
   ;
+  
+  # Builds a map from <attr>=value to <system>.<attr> = value.
+  eachSystemMap = systems: f: builtins.listToAttrs (builtins.map (system: { name = system; value = f system; }) systems);
 
   # Nix flakes insists on having a flat attribute set of derivations in
   # various places like the `packages` and `checks` attributes.
