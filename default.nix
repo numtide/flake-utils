@@ -57,6 +57,14 @@ let
     "x86_64-genode"
   ];
 
+  # A map from system to system. It's useful to detect typos.
+  #
+  # Instead of typing `"x86_64-linux"`, type `flake-utils.lib.system.x86_64-linux`
+  # and get an error back if you used a dash instead of an underscore.
+  system =
+    builtins.listToAttrs
+      (map (system: { name = system; value = system; }) allSystems);
+
   # eachSystem using defaultSystems
   eachDefaultSystem = eachSystem defaultSystems;
 
@@ -183,6 +191,7 @@ let
       flattenTree
       mkApp
       simpleFlake
+      system
       ;
   };
 in

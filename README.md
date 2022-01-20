@@ -12,6 +12,14 @@ flakes.
 
 ## Usage
 
+### `system -> (<system> -> <system>)`
+
+A map from system to system built from `allSystems`. It's mainly useful to
+detect typos and auto-complete if you use
+[rnix-lsp](https://github.com/nix-community/rnix-lsp).
+
+Eg: instead of typing `"x86_64-linux"`, use `system.x86_64-linux`
+
 ### `allSystems -> [<system>]`
 
 A list of all systems defined in nixpkgs. For a smaller list see `defaultSystems`
@@ -22,7 +30,7 @@ The list of systems supported by nixpkgs and built by hydra.
 Useful if you want add additional platforms:
 
 ```nix
-eachSystem (defaultSystems ++ ["armv7l-linux"]) (system: { hello = 42; })
+eachSystem (defaultSystems ++ [system.armv7l-linux]) (system: { hello = 42; })
 ```
 
 ### `eachSystem -> [<system>] -> (<system> -> attrs)`
@@ -34,7 +42,7 @@ then re-build the hierarchy.
 Eg:
 
 ```nix
-eachSystem ["x86_64-linux"] (system: { hello = 42; })
+eachSystem [ system.x86_64-linux ] (system: { hello = 42; })
 # => { hello = { x86_64-linux = 42; }; }
 eachSystem allSystems (system: { hello = 42; })
 # => {
@@ -132,7 +140,7 @@ Input:
 , # maps to the devShell output. Pass in a shell.nix file or function.
   shell ? null
 , # pass the list of supported systems
-  systems ? [ "x86_64-linux" ]
+  systems ? [ system.x86_64-linux ]
 }: null
 ```
 
