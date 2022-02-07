@@ -190,6 +190,7 @@ let
       defaultSystems
       eachDefaultSystem
       eachSystem
+      eachSystemMap
       filterPackages
       flattenTree
       mkApp
