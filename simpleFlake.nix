@@ -18,7 +18,7 @@
 , # maps to the devShell output. Pass in a shell.nix file or function.
   shell ? null
 , # pass the list of supported systems
-  systems ? [ "x86_64-linux" ]
+  systems ? [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ]
 }:
 let
   loadOverlay = obj:
