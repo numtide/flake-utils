@@ -178,7 +178,7 @@ let
     };
 
   # This function tries to capture a common flake pattern.
-  simpleFlake = import ./simpleFlake.nix { inherit lib; };
+  simpleFlake = import ./simpleFlake.nix { inherit lib defaultSystems; };
 
   # Helper functions for Nix evaluation
   check-utils = import ./check-utils.nix;
