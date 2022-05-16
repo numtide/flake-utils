@@ -29,7 +29,8 @@ let
   str = it: if it == null then "null" else (sanitizeDerivationName it);
 
   test = name: command: derivation {
-    inherit name system;
+    inherit system;
+    name = str name;
     builder = "/bin/sh";
     args = [ "-c" command ];
   };
