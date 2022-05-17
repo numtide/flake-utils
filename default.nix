@@ -143,6 +143,9 @@ let
     in
     builtins.foldl' op { } systems
   ;
+
+  # eachSystemMap using defaultSystems
+  eachDefaultSystemMap = eachSystemMap defaultSystems;
   
   # Builds a map from <attr>=value to <system>.<attr> = value.
   eachSystemMap = systems: f: builtins.listToAttrs (builtins.map (system: { name = system; value = f system; }) systems);
@@ -213,6 +216,7 @@ let
       defaultSystems
       eachDefaultSystem
       eachSystem
+      eachDefaultSystemMap
       eachSystemMap
       filterPackages
       flattenTree
