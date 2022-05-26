@@ -192,6 +192,8 @@ let
   #   }
   filterPackages = import ./filterPackages.nix { inherit allSystems; };
 
+  callLocklessFlake = import ./call-lockless-flake.nix;
+
   # Returns the structure used by `nix app`
   mkApp =
     { drv
