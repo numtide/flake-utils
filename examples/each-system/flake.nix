@@ -5,7 +5,7 @@
 
   outputs = { self, nixpkgs, flake-utils }:
     flake-utils.lib.eachDefaultSystem (system:
-      let pkgs = nixpkgs.legacyPackages.${system}; in
+      let pkgs = import nixpkgs { inherit system; }; in
       rec {
         packages = flake-utils.lib.flattenTree {
           hello = pkgs.hello;
