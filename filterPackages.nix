@@ -25,7 +25,7 @@ let
       badPlatforms = meta.badPlatforms or [ ];
     in
     # check for isDerivation, so this is independently useful of
-      # flattenTree, which also does filter on derviations
+      # flattenTree, which also does filter on derivations
     isDerivation v && !isBroken && (builtins.elem system platforms) &&
     !(builtins.elem system badPlatforms)
   ;
