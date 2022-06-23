@@ -21,7 +21,7 @@ let
       inherit (builtins) isAttrs;
       isDerivation = x: isAttrs x && x ? type && x.type == "derivation";
       isBroken = meta.broken or false;
-      platforms = meta.hydraPlatforms or meta.platforms or allSystems;
+      platforms = meta.platforms or allSystems;
       badPlatforms = meta.badPlatforms or [ ];
     in
     # check for isDerivation, so this is independently useful of
