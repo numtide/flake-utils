@@ -21,11 +21,13 @@ let
       inherit (builtins) isAttrs;
       isDerivation = x: isAttrs x && x ? type && x.type == "derivation";
       isBroken = meta.broken or false;
-      platforms = meta.hydraPlatforms or meta.platforms or allSystems;
+      platforms = meta.platforms or allSystems;
+      badPlatforms = meta.badPlatforms or [ ];
     in
     # check for isDerivation, so this is independently useful of
-      # flattenTree, which also does filter on derviations
-    isDerivation v && !isBroken && builtins.elem system platforms
+      # flattenTree, which also does filter on derivations
+    isDerivation v && !isBroken && (builtins.elem system platforms) &&
+    !(builtins.elem system badPlatforms)
   ;
 in
 filterAttrs sieve packages
