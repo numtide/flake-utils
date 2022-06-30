@@ -34,16 +34,18 @@ let
     builder = "/bin/sh";
     args = [ "-c" command ];
   };
+
+  success = test "SUCCESS" "echo success > $out";
 in
 {
 
   isEqual = a: b:
     if a == b
-    then test "SUCCESS__${str a}__IS_EQUAL__${str b}" "echo success > $out"
+    then success
     else test "FAILURE__${str a}__NOT_EQUAL__${str b}" "exit 1";
 
   hasKey = attrset: key:
     if attrset ? ${str key}
-    then test "SUCCESS__${str key}__EXISTS_IN_ATTRSET" "echo success > $out"
+    then success
     else test "FAILURE__${str key}__DOES_NOT_EXISTS_IN_ATTRSET_SIZE_${str(length (attrNames attrset))}" "exit 1";
 }
