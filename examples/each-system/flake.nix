@@ -6,14 +6,15 @@
   outputs = { self, nixpkgs, flake-utils }:
     flake-utils.lib.eachDefaultSystem (system:
       let pkgs = nixpkgs.legacyPackages.${system}; in
-      rec {
-        packages = flake-utils.lib.flattenTree {
+      {
+        packages = rec {
           hello = pkgs.hello;
-          gitAndTools = pkgs.gitAndTools;
+          default = hello;
         };
-        defaultPackage = packages.hello;
-        apps.hello = flake-utils.lib.mkApp { drv = packages.hello; };
-        defaultApp = apps.hello;
+        apps = rec {
+          hello = flake-utils.lib.mkApp { drv = self.packages.${system}.hello; };
+          default = hello;
+        };
       }
     );
 }
