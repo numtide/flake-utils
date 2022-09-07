@@ -33,13 +33,7 @@ let
       # Merge together the outputs for all systems.
       op = attrs: system:
         let
-          ret =
-            let
-              retOrFunc = f system;
-            in
-            if builtins.isFunction retOrFunc
-              then retOrFunc ret
-              else retOrFunc;
+          ret = maybeFix (f system);
           op = attrs: key: attrs //
               {
                 ${key} = (attrs.${key} or { })
@@ -56,7 +50,8 @@ let
   eachDefaultSystemMap = eachSystemMap defaultSystems;
 
   # Builds a map from <attr>=value to <system>.<attr> = value.
-  eachSystemMap = systems: f: builtins.listToAttrs (builtins.map (system: { name = system; value = f system; }) systems);
+  eachSystemMap = systems: f:
+    builtins.listToAttrs (builtins.map (system: { name = system; value = maybeFix (f system); }) systems);
 
   # Nix flakes insists on having a flat attribute set of derivations in
   # various places like the `packages` and `checks` attributes.
@@ -207,5 +202,11 @@ let
       system
       ;
   };
+
+  maybeFix = arg:
+    let
+      fix = f: let x = f x; in x;
+    in
+    if builtins.isFunction arg then fix arg else arg;
 in
 lib
