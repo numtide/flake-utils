@@ -83,6 +83,16 @@ eachSystem allSystems (system: { hello = 42; })
 }
 ```
 
+If you pass a function rather than an attribute set after the `system` argument,
+it will receive as its argument the final attribute set. For example:
+
+```nix
+eachSystem [ system.x86_64-linux ] (system: self: { a = 2; b = self.a + 3; })
+```
+
+`self` is not that useful in this case, as it can be replaced with the `rec`
+keyword but there can be situations where it is preferred.
+
 ### `eachDefaultSystem :: (<system> -> attrs)`
 
 `eachSystem` pre-populated with `defaultSystems`.

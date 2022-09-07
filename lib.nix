@@ -33,7 +33,13 @@ let
       # Merge together the outputs for all systems.
       op = attrs: system:
         let
-          ret = f system;
+          ret =
+            let
+              retOrFunc = f system;
+            in
+            if builtins.isFunction retOrFunc
+              then retOrFunc ret
+              else retOrFunc;
           op = attrs: key: attrs //
               {
                 ${key} = (attrs.${key} or { })
