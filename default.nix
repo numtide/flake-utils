@@ -128,12 +128,20 @@ let
           op = attrs: key:
             let
               appendSystem = key: system: ret:
-                if key == "hydraJobs"
+                if builtins.substring 0 1 key == "_"
+                then ret.${key}
+                else if key == "hydraJobs"
                   then (pushDownSystem system (attrs.hydraJobs or {}) ret.hydraJobs)
                   else { ${system} = ret.${key}; };
             in attrs //
               {
-                ${key} = (attrs.${key} or { })
+                ${
+                  if builtins.substring 0 2 key == "__"
+                  then key
+                  else if builtins.substring 0 1 key == "_"
+                  then builtins.substring 1 (-1) key
+                  else key
+                } = (attrs.${key} or { })
                   // (appendSystem key system ret);
               }
           ;
