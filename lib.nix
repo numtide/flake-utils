@@ -1,3 +1,4 @@
+{ }:
 let
   # The list of systems supported by nixpkgs and hydra
   defaultSystems = import ./systems;
