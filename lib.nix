@@ -1,16 +1,14 @@
-{ }:
+{ # The list of all valid systems
+  allSystems
+  # The list of systems chosen for evaluation
+, systems
+}:
 let
   # Included from `nixpkgs/lib/trivial.nix`.
   warn =
     if builtins.elem (builtins.getEnv "NIX_ABORT_ON_WARN") ["1" "true" "yes"]
     then msg: builtins.trace "[1;31mwarning: ${msg}[0m" (abort "NIX_ABORT_ON_WARN=true; warnings are treated as unrecoverable errors.")
     else msg: builtins.trace "[1;31mwarning: ${msg}[0m";
-
-  # The list of systems supported by nixpkgs and hydra
-  systems = import ./systems;
-
-  # List of all systems defined in nixpkgs
-  allSystems = import ./systems/all.nix;
 
   # A map from system to system. It's useful to detect typos.
   #

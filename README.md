@@ -7,7 +7,7 @@
 Pure Nix flake utility functions.
 
 The goal of this project is to build a collection of pure Nix functions that don't
-depend on nixpkgs, and that are useful in the context of writing other Nix
+depend on Nixpkgs, and that are useful in the context of writing other Nix
 flakes.
 
 ## Usage
@@ -22,11 +22,14 @@ Eg: instead of typing `"x86_64-linux"`, use `system.x86_64-linux`
 
 ### `allSystems -> [<system>]`
 
-A list of all systems defined in nixpkgs. For a smaller list see `systems`
+The list of all valid systems, overridable via the `systems` flake input.
+Defaults to the list of all systems defined in Nixpkgs.
+For a smaller list, see `systems`.
 
 ### `systems -> [<system>]`
 
-The list of systems supported by nixpkgs and built by hydra.
+The list of systems chosen for evaluation, overridable via the `systems` flake input.
+Defaults to the list of systems supported by Nixpkgs and built by Hydra.
 Useful if you want add additional platforms:
 
 ```nix
@@ -122,7 +125,7 @@ Returns:
 ### `simpleFlake -> attrs -> attrs`
 
 This function should be useful for most common use-cases where you have a
-simple flake that builds a package. It takes nixpkgs and a bunch of other
+simple flake that builds a package. It takes Nixpkgs and a bunch of other
 parameters and outputs a value that is compatible as a flake output.
 
 Input:
@@ -130,17 +133,17 @@ Input:
 {
   # pass an instance of self
   self
-, # pass an instance of the nixpkgs flake
+, # pass an instance of the Nixpkgs flake
   nixpkgs
 , # we assume that the name maps to the project name, and also that the
   # overlay has an attribute with the `name` prefix that contains all of the
   # project's packages.
   name
-, # nixpkgs config
+, # Nixpkgs config
   config ? { }
 , # pass either a function or a file
   overlay ? null
-, # use this to load other flakes overlays to supplement nixpkgs
+, # use this to load other flakes overlays to supplement Nixpkgs
   preOverlays ? [ ]
 , # maps to the devShell output. Pass in a shell.nix file or function.
   shell ? null
@@ -177,6 +180,6 @@ $ nix flake check
 warning: unknown flake output 'lib'
 ```
 
-nixpkgs is currently having the same issue so I assume that it will be
+Nixpkgs is currently having the same issue so I assume that it will be
 eventually standardized.
 

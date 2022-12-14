@@ -18,17 +18,17 @@ let systems = defaultSystems; in
 {
   # pass an instance of self
   self
-, # pass an instance of the nixpkgs flake
+, # pass an instance of the Nixpkgs flake
   nixpkgs
 , # we assume that the name maps to the project name, and also that the
   # overlay has an attribute with the `name` prefix that contains all of the
   # project's packages.
   name
-, # nixpkgs config
+, # Nixpkgs config
   config ? { }
 , # pass either a function or a file
   overlay ? null
-, # use this to load other flakes overlays to supplement nixpkgs
+, # use this to load other flakes overlays to supplement Nixpkgs
   preOverlays ? [ ]
 , # maps to the devShell output. Pass in a shell.nix file or function.
   shell ? null

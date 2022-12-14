@@ -1,6 +1,6 @@
-# List of all systems defined in nixpkgs
-# Keep in sync with nixpkgs with the following command:
-# $ nix-instantiate --json --eval --expr "with import <nixpkgs> {}; lib.platforms.all" | jq 'sort' | sed 's!,!!'
+# `allSystems`: The list of all valid systems, overridable via the `systems` flake input
+# Keep in sync with the list of all systems defined in Nixpkgs with the following command:
+# $ nix eval --json --apply 'lib: lib.platforms.all' "nixpkgs#lib" | nix run 'nixpkgs#jq' -- 'sort' | sed 's/,$//'
 [
   "aarch64-darwin"
   "aarch64-genode"

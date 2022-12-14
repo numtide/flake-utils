@@ -1,0 +1,23 @@
+{
+  "nodes": {
+    "root": {
+      "inputs": {
+        "systems": "systems"
+      }
+    },
+    "systems": {
+      "locked": {
+        "lastModified": 1,
+        "narHash": "sha256-sp8QdTi6RfBvVDjSfHVhiV1FmAl0E+NFzKuJY+79svo=",
+        "path": "./systems",
+        "type": "path"
+      },
+      "original": {
+        "path": "./systems",
+        "type": "path"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}
