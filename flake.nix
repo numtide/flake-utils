@@ -1,7 +1,7 @@
 {
   description = "Pure Nix flake utility functions";
   outputs = { self }: {
-    lib = import ./.;
+    lib = import ./lib.nix;
     templates = {
       simple-flake = {
         path = ./examples/simple-flake;
