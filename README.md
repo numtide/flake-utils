@@ -22,16 +22,20 @@ Eg: instead of typing `"x86_64-linux"`, use `system.x86_64-linux`
 
 ### `allSystems -> [<system>]`
 
-A list of all systems defined in nixpkgs. For a smaller list see `defaultSystems`
+A list of all systems defined in nixpkgs. For a smaller list see `systems`
 
-### `defaultSystems -> [<system>]`
+### `systems -> [<system>]`
 
 The list of systems supported by nixpkgs and built by hydra.
 Useful if you want add additional platforms:
 
 ```nix
-eachSystem (defaultSystems ++ [system.armv7l-linux]) (system: { hello = 42; })
+eachSystem (systems ++ [system.armv7l-linux]) (system: { hello = 42; })
 ```
+
+### `defaultSystems = systems` (deprecated)
+
+A deprecated alias for `systems`.
 
 ### `eachSystem -> [<system>] -> (<system> -> attrs)`
 
@@ -58,7 +62,7 @@ eachSystem allSystems (system: { hello = 42; })
 
 ### `eachDefaultSystem -> (<system> -> attrs)`
 
-`eachSystem` pre-populated with `defaultSystems`.
+`eachSystem` pre-populated with `systems`.
 
 #### Example
 

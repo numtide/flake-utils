@@ -1,6 +1,19 @@
 { lib
-, defaultSystems ? [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ]
-}:
+, systems ? [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ]
+ # `defaultSystems` is deprecated, use `systems` instead.
+, defaultSystems ? systems
+} @ args:
+# (Backwards compatibility support starts)
+assert let
+  # Included from `nixpkgs/lib/trivial.nix`.
+  warn = if builtins.elem (builtins.getEnv "NIX_ABORT_ON_WARN") ["1" "true" "yes"]
+    then msg: builtins.trace "[1;31mwarning: ${msg}[0m" (abort "NIX_ABORT_ON_WARN=true; warnings are treated as unrecoverable errors.")
+    else msg: builtins.trace "[1;31mwarning: ${msg}[0m";
+in args ? defaultSystems -> warn "`defaultSystems` is deprecated, use `systems` instead!"
+    !args ? systems;
+assert args ? systems -> !args ? defaultSystems;
+let systems = defaultSystems; in
+# (Backwards compaibility support ends)
 # This function returns a flake outputs-compatible schema.
 {
   # pass an instance of self
@@ -20,7 +33,7 @@
 , # maps to the devShell output. Pass in a shell.nix file or function.
   shell ? null
 , # pass the list of supported systems
-  systems ? defaultSystems
+  systems ? systems
 }:
 let
   loadOverlay = obj:

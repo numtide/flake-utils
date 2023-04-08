@@ -1,7 +1,13 @@
 { }:
 let
+  # Included from `nixpkgs/lib/trivial.nix`.
+  warn =
+    if builtins.elem (builtins.getEnv "NIX_ABORT_ON_WARN") ["1" "true" "yes"]
+    then msg: builtins.trace "[1;31mwarning: ${msg}[0m" (abort "NIX_ABORT_ON_WARN=true; warnings are treated as unrecoverable errors.")
+    else msg: builtins.trace "[1;31mwarning: ${msg}[0m";
+
   # The list of systems supported by nixpkgs and hydra
-  defaultSystems = import ./systems;
+  systems = import ./systems;
 
   # List of all systems defined in nixpkgs
   allSystems = import ./systems/all.nix;
@@ -14,8 +20,8 @@ let
     builtins.listToAttrs
       (map (system: { name = system; value = system; }) allSystems);
 
-  # eachSystem using defaultSystems
-  eachDefaultSystem = eachSystem defaultSystems;
+  # eachSystem using systems
+  eachDefaultSystem = eachSystem systems;
 
   # Builds a map from <attr>=value to <attr>.<system>=value for each system,
   # except for the `hydraJobs` attribute, where it maps the inner attributes,
@@ -70,8 +76,8 @@ let
     builtins.foldl' op { } systems
   ;
 
-  # eachSystemMap using defaultSystems
-  eachDefaultSystemMap = eachSystemMap defaultSystems;
+  # eachSystemMap using systems
+  eachDefaultSystemMap = eachSystemMap systems;
 
   # Builds a map from <attr>=value to <system>.<attr> = value.
   eachSystemMap = systems: f: builtins.listToAttrs (builtins.map (system: { name = system; value = f system; }) systems);
@@ -130,7 +136,7 @@ let
     };
 
   # This function tries to capture a common flake pattern.
-  simpleFlake = import ./simpleFlake.nix { inherit lib defaultSystems; };
+  simpleFlake = import ./simpleFlake.nix { inherit lib systems; };
 
   # Helper functions for Nix evaluation
   check-utils = import ./check-utils.nix;
@@ -139,7 +145,6 @@ let
     inherit
       allSystems
       check-utils
-      defaultSystems
       eachDefaultSystem
       eachSystem
       eachDefaultSystemMap
@@ -149,7 +154,10 @@ let
       mkApp
       simpleFlake
       system
+      systems
       ;
+    defaultSystems = warn "`lib.defaultSystems` is deprecated, use `lib.systems` instead!"
+      systems;
   };
 in
 lib
