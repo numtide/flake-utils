@@ -9,6 +9,7 @@
       defaultSystems = import systems;
     };
     templates = {
+      default = self.templates.each-system;
       simple-flake = {
         path = ./examples/simple-flake;
         description = "A flake using flake-utils.lib.simpleFlake";
@@ -22,6 +23,5 @@
         description = "A flake with tests";
       };
     };
-    defaultTemplate = self.templates.each-system;
   };
 }
