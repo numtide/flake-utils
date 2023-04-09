@@ -12,19 +12,27 @@ flakes.
 
 ## Usage
 
-### `system -> (<system> -> <system>)`
+### `system :: { system = system, ... }`
 
-A map from system to system built from `allSystems`. It's mainly useful to
-detect typos and auto-complete if you use
-[rnix-lsp](https://github.com/nix-community/rnix-lsp).
+A map from system to system built from `allSystems`:
+```nix
+system = {
+  x86_64-linux = "x86_64-linux";
+  x86_64-darwin = "x86_64-darwin";
+  ...
+}
+```
+It's mainly useful to
+detect typos and auto-complete if you use [rnix-lsp](https://github.com/nix-community/rnix-lsp).
+   
+Eg: instead of typing `"x86_64-linux"`, use `system.x86_64-linux`.
 
-Eg: instead of typing `"x86_64-linux"`, use `system.x86_64-linux`
 
-### `allSystems -> [<system>]`
+### `allSystems :: [<system>]`
 
-A list of all systems defined in nixpkgs. For a smaller list see `defaultSystems`
+A list of all systems defined in nixpkgs. For a smaller list see `defaultSystems`.
 
-### `defaultSystems -> [<system>]`
+### `defaultSystems :: [<system>]`
 
 The list of systems supported by nixpkgs and built by hydra.
 Useful if you want add additional platforms:
@@ -33,7 +41,7 @@ Useful if you want add additional platforms:
 eachSystem (defaultSystems ++ [system.armv7l-linux]) (system: { hello = 42; })
 ```
 
-### `eachSystem -> [<system>] -> (<system> -> attrs)`
+### `eachSystem :: [<system>] -> (<system> -> attrs)`
 
 A common case is to build the same structure for each system. Instead of
 building the hierarchy manually or per prefix, iterate over each systems and
@@ -56,7 +64,7 @@ eachSystem allSystems (system: { hello = 42; })
 }
 ```
 
-### `eachDefaultSystem -> (<system> -> attrs)`
+### `eachDefaultSystem :: (<system> -> attrs)`
 
 `eachSystem` pre-populated with `defaultSystems`.
 
@@ -91,7 +99,7 @@ eachSystem allSystems (system: { hello = 42; })
 A small utility that builds the structure expected by the special `apps` and `defaultApp` prefixes.
 
 
-### `flattenTree -> attrs -> attrs`
+### `flattenTree :: attrs -> attrs`
 
 Nix flakes insists on having a flat attribute set of derivations in
 various places like the `packages` and `checks` attributes.
@@ -115,7 +123,7 @@ Returns:
 }
 ```
 
-### `simpleFlake -> attrs -> attrs`
+### `simpleFlake :: attrs -> attrs`
 
 This function should be useful for most common use-cases where you have a
 simple flake that builds a package. It takes nixpkgs and a bunch of other
