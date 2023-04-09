@@ -1,7 +1,5 @@
 # flake-utils
 
-[![Support room on Matrix](https://img.shields.io/matrix/flake-utils:numtide.com.svg?label=%23flake-utils%3Anumtide.com&logo=matrix&server_fqdn=matrix.numtide.com)](https://matrix.to/#/#flake-utils:numtide.com)
-
 **STATUS: stable**
 
 Pure Nix flake utility functions.
@@ -32,14 +30,11 @@ Eg: instead of typing `"x86_64-linux"`, use `system.x86_64-linux`.
 
 A list of all systems defined in nixpkgs. For a smaller list see `defaultSystems`.
 
-### `defaultSystems :: [<system>]`
+### `defaultSystems :: [<system>]` (deprecated)
 
-The list of systems supported by nixpkgs and built by hydra.
-Useful if you want add additional platforms:
+The list of systems passed to the flake-utils `systems` input.
 
-```nix
-eachSystem (defaultSystems ++ [system.armv7l-linux]) (system: { hello = 42; })
-```
+Use this pattern to pass different systems to your flake: <https://github.com/nix-systems/nix-systems>.
 
 ### `eachSystem :: [<system>] -> (<system> -> attrs)`
 

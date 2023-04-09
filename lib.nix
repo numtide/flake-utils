@@ -8,6 +8,8 @@
   ]
 }:
 let
+  inherit defaultSystems;
+
   # List of all systems defined in nixpkgs
   # Keep in sync with nixpkgs wit the following command:
   # $ nix-instantiate --json --eval --expr "with import <nixpkgs> {}; lib.platforms.all" | jq 'sort' | sed 's!,!!'
@@ -119,8 +121,8 @@ let
         builtins.mapAttrs
           (name: value:
             if ! (builtins.isAttrs value) then value
-            else if isDerivation value then (merged.${name} or {}) // { ${system} = value; }
-            else pushDownSystem system (merged.${name} or {}) value);
+            else if isDerivation value then (merged.${name} or { }) // { ${system} = value; }
+            else pushDownSystem system (merged.${name} or { }) value);
 
       # Merge together the outputs for all systems.
       op = attrs: system:
@@ -130,13 +132,14 @@ let
             let
               appendSystem = key: system: ret:
                 if key == "hydraJobs"
-                  then (pushDownSystem system (attrs.hydraJobs or {}) ret.hydraJobs)
-                  else { ${system} = ret.${key}; };
-            in attrs //
-              {
-                ${key} = (attrs.${key} or { })
-                  // (appendSystem key system ret);
-              }
+                then (pushDownSystem system (attrs.hydraJobs or { }) ret.hydraJobs)
+                else { ${system} = ret.${key}; };
+            in
+            attrs //
+            {
+              ${key} = (attrs.${key} or { })
+              // (appendSystem key system ret);
+            }
           ;
         in
         builtins.foldl' op attrs (builtins.attrNames ret);
@@ -146,7 +149,7 @@ let
 
   # eachSystemMap using defaultSystems
   eachDefaultSystemMap = eachSystemMap defaultSystems;
-  
+
   # Builds a map from <attr>=value to <system>.<attr> = value.
   eachSystemMap = systems: f: builtins.listToAttrs (builtins.map (system: { name = system; value = f system; }) systems);
 
