@@ -1,7 +1,13 @@
 {
   description = "Pure Nix flake utility functions";
-  outputs = { self }: {
-    lib = import ./.;
+
+  # Externally extensible flake systems. See <https://github.com/nix-systems/nix-systems>.
+  inputs.systems.url = "github:nix-systems/default";
+
+  outputs = { self, systems }: {
+    lib = import ./lib.nix {
+      defaultSystems = import systems;
+    };
     templates = {
       simple-flake = {
         path = ./examples/simple-flake;
