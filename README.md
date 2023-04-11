@@ -30,11 +30,35 @@ Eg: instead of typing `"x86_64-linux"`, use `system.x86_64-linux`.
 
 A list of all systems defined in nixpkgs. For a smaller list see `defaultSystems`.
 
-### `defaultSystems :: [<system>]` (deprecated)
+### `defaultSystems :: [<system>]`
 
-The list of systems passed to the flake-utils `systems` input.
+The list of systems to use in `eachDefaultSystem` and `simpleFlake`.
 
-Use this pattern to pass different systems to your flake: <https://github.com/nix-systems/nix-systems>.
+The default values are `["x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin"]`.
+
+It's possible to override and control that list by changing the `systems` input of this flake.
+
+Eg (in your `flake.nix`):
+
+```nix
+{
+  # 1. Defined a "systems" inputs that maps to only ["x86_64-linux"]
+  inputs.systems.url = "github:nix-systems/x86_64-linux";
+
+  inputs.flake-utils.src = "github:numtide/flake-utils";
+  # 2. Override the flake-utils default to your version
+  inputs.flake-utils.inputs.systems.follows = "systems";
+
+  outputs = { self, flake-utils, ... }:
+    # Now eachDefaultSystem is only using ["x86_64-linux"], but this list can also
+    # further be changed by users of your flake.
+    flake-utils.lib.eachDefaultSystem (system: {
+      # ...
+    });
+}
+```
+
+For more details in this pattern, see: <https://github.com/nix-systems/nix-systems>.
 
 ### `eachSystem :: [<system>] -> (<system> -> attrs)`
 
