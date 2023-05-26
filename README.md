@@ -45,7 +45,7 @@ Eg (in your `flake.nix`):
   # 1. Defined a "systems" inputs that maps to only ["x86_64-linux"]
   inputs.systems.url = "github:nix-systems/x86_64-linux";
 
-  inputs.flake-utils.src = "github:numtide/flake-utils";
+  inputs.flake-utils.url = "github:numtide/flake-utils";
   # 2. Override the flake-utils default to your version
   inputs.flake-utils.inputs.systems.follows = "systems";
 
