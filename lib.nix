@@ -128,6 +128,79 @@ let
   #   }
   filterPackages = import ./filterPackages.nix { inherit allSystems; };
 
+  # Meld merges subflakes using common inputs.  Useful when you want
+  # to split up a large flake with many different components into more
+  # manageable parts.
+  #
+  # For example:
+  #
+  #   {
+  #     inputs = {
+  #       flutils.url = "github:numtide/flake-utils";
+  #       nixpkgs.url = "github:nixos/nixpkgs";
+  #     };
+  #     outputs = inputs@{ flutils, ... }: flutils.lib.meld inputs [
+  #       ./nix/packages
+  #       ./nix/hardware
+  #       ./nix/overlays
+  #       # ...
+  #     ];
+  #   }
+  #
+  # Where ./nix/packages/default.nix looks like just the output
+  # portion of a flake.
+  #
+  #   { flutils, nixpkgs, ... }: flutils.lib.eachDefaultSystem (system:
+  #     let pkgs = import nixpkgs { inherit system; }; in
+  #     {
+  #       packages = {
+  #         foo = ...;
+  #         bar = ...;
+  #         # ...
+  #       };
+  #     }
+  #   )
+  #
+  # You can also use meld within the subflakes to further subdivide
+  # your flake into a tree like structure.  For example,
+  # ./nix/hardware/default.nix might look like:
+  #
+  #  inputs@{ flutils, ... }: flutils.lib.meld inputs [
+  #    ./foobox.nix
+  #    ./barbox.nix
+  #  ]
+  meld = let
+    # Pulled from nixpkgs.lib
+    recursiveUpdateUntil =
+      # Predicate, taking the path to the current attribute as a list of strings for attribute names, and the two values at that path from the original arguments.
+      pred:
+      # Left attribute set of the merge.
+      lhs:
+      # Right attribute set of the merge.
+      rhs:
+      let
+        f = attrPath:
+          builtins.zipAttrsWith (n: values:
+            let here = attrPath ++ [ n ];
+            in if builtins.length values == 1
+            || pred here (builtins.elemAt values 1) (builtins.head values) then
+              builtins.head values
+            else
+              f here values);
+      in f [ ] [ rhs lhs ];
+
+    # Pulled from nixpkgs.lib
+    recursiveUpdate =
+      # Left attribute set of the merge.
+      lhs:
+      # Right attribute set of the merge.
+      rhs:
+      recursiveUpdateUntil (path: lhs: rhs: !(builtins.isAttrs lhs && builtins.isAttrs rhs)) lhs
+      rhs;
+  in inputs:
+  builtins.foldl' (output: subflake:
+    recursiveUpdate output (import subflake inputs)) { };
+
   # Returns the structure used by `nix app`
   mkApp =
     { drv
@@ -156,6 +229,7 @@ let
       eachSystemMap
       filterPackages
       flattenTree
+      meld
       mkApp
       simpleFlake
       system

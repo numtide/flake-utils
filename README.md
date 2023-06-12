@@ -113,6 +113,12 @@ eachSystem allSystems (system: { hello = 42; })
 }
 ```
 
+### `meld :: attrs -> [ path ] -> attrs`
+
+Meld merges subflakes using common inputs.  Useful when you want to
+split up a large flake with many different components into more
+manageable parts.
+
 ### `mkApp { drv, name ? drv.pname or drv.name, exePath ? drv.passthru.exePath or "/bin/${name}"`
 
 A small utility that builds the structure expected by the special `apps` and `defaultApp` prefixes.
