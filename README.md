@@ -105,7 +105,10 @@ eachSystem allSystems (system: { hello = 42; })
           default = hello;
         };
         apps = rec {
-          hello = flake-utils.lib.mkApp { drv = self.packages.${system}.hello; };
+          hello = {
+            type = "app";
+            program = "${nixpkgs.lib.getExe self.packages.${system}.hello}";
+          };
           default = hello;
         };
       }
@@ -120,6 +123,12 @@ split up a large flake with many different components into more
 manageable parts.
 
 ### `mkApp { drv, name ? drv.pname or drv.name, exePath ? drv.passthru.exePath or "/bin/${name}"`
+
+> **DEPRECATED**
+>
+> `mkApp` has been deprecated in favor of direct definitions.
+>
+> Example: `{ type = "app"; program = "${nixpkgs.lib.getExe drv}"; }`
 
 A small utility that builds the structure expected by the special `apps` and `defaultApp` prefixes.
 

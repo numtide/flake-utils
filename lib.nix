@@ -202,11 +202,19 @@ let
     recursiveUpdate output (import subflake inputs)) { };
 
   # Returns the structure used by `nix app`
-  mkApp =
+  mkApp = let
+    # Pulled from nixpkgs.lib
+    warn =
+      if builtins.elem (builtins.getEnv "NIX_ABORT_ON_WARN") ["1" "true" "yes"]
+      then msg: builtins.trace "[1;31mwarning: ${msg}[0m" (abort "NIX_ABORT_ON_WARN=true; warnings are treated as unrecoverable errors.")
+      else msg: builtins.trace "[1;31mwarning: ${msg}[0m";
+  in
     { drv
     , name ? drv.pname or drv.name
     , exePath ? drv.passthru.exePath or "/bin/${name}"
     }:
+    warn
+      "`mkApp` has been deprecated in favor of direct definitions. Replace definitions of `mkApp { drv = ...; }` with `{ type = \"app\"; program = \"\${nixpkgs.lib.getExe drv}\"; }`, and definitions of `mkApp { drv = ...; name = \"abc\"; }` with `{ type = \"app\"; program = \"\${drv}/bin/abc\"; }` to remove this warning. Use of `passthru.exePath` inside derivations should be replaced with nixpkgs's `meta.mainProgram` instead."
     {
       type = "app";
       program = "${drv}${exePath}";

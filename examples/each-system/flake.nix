@@ -12,7 +12,10 @@
           default = hello;
         };
         apps = rec {
-          hello = flake-utils.lib.mkApp { drv = self.packages.${system}.hello; };
+          hello = {
+            type = "app";
+            program = "${nixpkgs.lib.getExe self.packages.${system}.hello}";
+          };
           default = hello;
         };
       }
