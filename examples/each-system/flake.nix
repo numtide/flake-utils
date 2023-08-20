@@ -14,7 +14,7 @@
         apps = rec {
           hello = {
             type = "app";
-            program = "${nixpkgs.lib.getExe self.packages.${system}.hello}";
+            program = nixpkgs.lib.getExe self.packages.${system}.hello;
           };
           default = hello;
         };
