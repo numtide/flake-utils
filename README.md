@@ -128,7 +128,7 @@ manageable parts.
 >
 > `mkApp` has been deprecated in favor of direct definitions.
 >
-> Example: `{ type = "app"; program = "${nixpkgs.lib.getExe drv}"; }`
+> Example: `{ type = "app"; program = nixpkgs.lib.getExe drv; }`
 
 A small utility that builds the structure expected by the special `apps` and `defaultApp` prefixes.
 
