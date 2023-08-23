@@ -100,16 +100,21 @@ eachSystem allSystems (system: { hello = 42; })
     flake-utils.lib.eachDefaultSystem (system:
       let pkgs = nixpkgs.legacyPackages.${system}; in
       {
-        packages = rec {
-          hello = pkgs.hello;
-          default = hello;
+        packages = {
+          default = pkgs.hello;
+          # `nix run .#find` will work because findutils.meta.mainProgram is set to "find".
+          find = pkgs.findutils;
         };
-        apps = rec {
-          hello = {
-            type = "app";
-            program = "${nixpkgs.lib.getExe self.packages.${system}.hello}";
+        # Use apps to expose packages that have multiple binaries.
+        apps = {
+          xargs = flake-utils.lib.mkApp {
+            drv = pkgs.findutils;
+            name = "xargs";
           };
-          default = hello;
+          ls = flake-utils.lib.mkApp {
+            drv = pkgs.coreutils;
+            name = "ls";
+          };
         };
       }
     );

@@ -211,10 +211,14 @@ let
   in
     { drv
     , name ? drv.pname or drv.name
-    , exePath ? drv.passthru.exePath or "/bin/${name}"
+    , exePath ? "/bin/${name}"
     }:
+    (if (drv.passthru or {}) ? exePath then
     warn
-      "`mkApp` has been deprecated in favor of direct definitions. Replace definitions of `mkApp { drv = ...; }` with `{ type = \"app\"; program = \"\${nixpkgs.lib.getExe drv}\"; }`, and definitions of `mkApp { drv = ...; name = \"abc\"; }` with `{ type = \"app\"; program = \"\${drv}/bin/abc\"; }` to remove this warning. Use of `passthru.exePath` inside derivations should be replaced with nixpkgs's `meta.mainProgram` instead."
+      "flake-utils.lib.mkApp: ${name} has the deprecated `drv.passthru.exePath` attribute. Please pass the `exePath` directly."
+    else
+      lib.id
+    )
     {
       type = "app";
       program = "${drv}${exePath}";
