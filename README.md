@@ -127,15 +127,16 @@ Meld merges subflakes using common inputs.  Useful when you want to
 split up a large flake with many different components into more
 manageable parts.
 
-### `mkApp { drv, name ? drv.pname or drv.name, exePath ? drv.passthru.exePath or "/bin/${name}"`
+### `mkApp { drv, name ? drv.pname or drv.name, exePath ? "/bin/${name}"`
 
 > **DEPRECATED**
 >
-> `mkApp` has been deprecated in favor of direct definitions.
+> `mkApp` used to look for `drv.passthru.exePath`, and it's no longer the case.
 >
-> Example: `{ type = "app"; program = nixpkgs.lib.getExe drv; }`
+> For derivations that only expose a single binary, set the `meta.mainProgram`
+> attribute on the package and expose it in the `packages`.
 
-A small utility that builds the structure expected by the special `apps` and `defaultApp` prefixes.
+A small utility that builds the structure expected by the special `apps` prefix.
 
 
 ### `flattenTree :: attrs -> attrs`
