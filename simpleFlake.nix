@@ -59,6 +59,12 @@ let
     }
     //
     (
+      if packages ? defaultPackage then {
+        defaultPackage = packages.defaultPackage;
+      } else { }
+    )
+    //
+    (
       if packages ? default then {
         packages.default = packages.default;
       } else { }
