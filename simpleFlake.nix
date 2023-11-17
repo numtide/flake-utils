@@ -59,8 +59,8 @@ let
     }
     //
     (
-      if packages ? defaultPackage then {
-        defaultPackage = packages.defaultPackage;
+      if packages ? default then {
+        packages.default = packages.default;
       } else { }
     )
     //
@@ -71,10 +71,9 @@ let
     )
     //
     (
-      if shell != null then {
-        devShell = shell_ { inherit pkgs; };
-      } else if packages ? devShell then {
-        devShell = packages.devShell;
+      if shell != null then rec {
+        devShells.${name} = shell_ { inherit pkgs; };
+        devShells.default = devShells.${name};
       } else { }
     )
   );
