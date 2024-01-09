@@ -130,7 +130,7 @@ Nix flakes insists on having a flat attribute set of derivations in
 various places like the `packages` and `checks` attributes.
 
 This function traverses a tree of attributes (by respecting
-recurseIntoAttrs) and only returns their derivations, with a flattened
+[recurseIntoAttrs](https://noogle.dev/f/lib/recurseIntoAttrs)) and only returns their derivations, with a flattened
 key-space.
 
 Eg:
