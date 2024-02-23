@@ -43,7 +43,15 @@ let
         in
         builtins.foldl' op attrs (builtins.attrNames ret);
     in
-    builtins.foldl' op { } systems
+    builtins.foldl' op { }
+      (systems
+       ++ # add the current system if --impure is used
+          (if builtins?currentSystem then
+             if builtins.elem builtins.currentSystem systems
+             then []
+             else [ builtins.currentSystem ]
+           else
+             []))
   ;
 
   # eachSystemMap using defaultSystems
