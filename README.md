@@ -100,13 +100,21 @@ eachSystem allSystems (system: { hello = 42; })
     flake-utils.lib.eachDefaultSystem (system:
       let pkgs = nixpkgs.legacyPackages.${system}; in
       {
-        packages = rec {
-          hello = pkgs.hello;
-          default = hello;
+        packages = {
+          default = pkgs.hello;
+          # `nix run .#find` will work because findutils.meta.mainProgram is set to "find".
+          find = pkgs.findutils;
         };
-        apps = rec {
-          hello = flake-utils.lib.mkApp { drv = self.packages.${system}.hello; };
-          default = hello;
+        # Use apps to expose packages that have multiple binaries.
+        apps = {
+          xargs = flake-utils.lib.mkApp {
+            drv = pkgs.findutils;
+            name = "xargs";
+          };
+          ls = flake-utils.lib.mkApp {
+            drv = pkgs.coreutils;
+            name = "ls";
+          };
         };
       }
     );
@@ -119,9 +127,16 @@ Meld merges subflakes using common inputs.  Useful when you want to
 split up a large flake with many different components into more
 manageable parts.
 
-### `mkApp { drv, name ? drv.pname or drv.name, exePath ? drv.passthru.exePath or "/bin/${name}"`
+### `mkApp { drv, name ? drv.pname or drv.name, exePath ? "/bin/${name}"`
 
-A small utility that builds the structure expected by the special `apps` and `defaultApp` prefixes.
+> **DEPRECATED**
+>
+> `mkApp` used to look for `drv.passthru.exePath`, and it's no longer the case.
+>
+> For derivations that only expose a single binary, set the `meta.mainProgram`
+> attribute on the package and expose it in the `packages`.
+
+A small utility that builds the structure expected by the special `apps` prefix.
 
 
 ### `flattenTree :: attrs -> attrs`

@@ -176,11 +176,23 @@ let
     recursiveUpdate output (import subflake inputs)) { };
 
   # Returns the structure used by `nix app`
-  mkApp =
+  mkApp = let
+    # Pulled from nixpkgs.lib
+    warn =
+      if builtins.elem (builtins.getEnv "NIX_ABORT_ON_WARN") ["1" "true" "yes"]
+      then msg: builtins.trace "[1;31mwarning: ${msg}[0m" (abort "NIX_ABORT_ON_WARN=true; warnings are treated as unrecoverable errors.")
+      else msg: builtins.trace "[1;31mwarning: ${msg}[0m";
+  in
     { drv
     , name ? drv.pname or drv.name
-    , exePath ? drv.passthru.exePath or "/bin/${name}"
+    , exePath ? "/bin/${name}"
     }:
+    (if (drv.passthru or {}) ? exePath then
+    warn
+      "flake-utils.lib.mkApp: ${name} has the deprecated `drv.passthru.exePath` attribute. Please pass the `exePath` directly."
+    else
+      lib.id
+    )
     {
       type = "app";
       program = "${drv}${exePath}";
