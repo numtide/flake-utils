@@ -1,8 +1,19 @@
+<div align="center">
+
 # flake-utils
 
-**STATUS: stable**
+<img src="flake-utils.svg" height="150"/>
 
-Pure Nix flake utility functions.
+**Pure Nix flake utility functions.**
+
+*A <a href="https://numtide.com/">numtide</a> project.*
+
+<p>
+<a href="https://github.com/numtide/flake-utils/actions/workflows/nix.yml"><img src="https://github.com/numtide/flake-utils/actions/workflows/nix.yml/badge.svg"/></a>
+<a href="https://app.element.io/#/room/#home:numtide.com"><img src="https://img.shields.io/badge/Support-%23numtide-blue"/></a>
+</p>
+
+</div>
 
 The goal of this project is to build a collection of pure Nix functions that don't
 depend on nixpkgs, and that are useful in the context of writing other Nix
