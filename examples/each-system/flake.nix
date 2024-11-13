@@ -7,13 +7,21 @@
     flake-utils.lib.eachDefaultSystem (system:
       let pkgs = nixpkgs.legacyPackages.${system}; in
       {
-        packages = rec {
-          hello = pkgs.hello;
-          default = hello;
+        packages = {
+          default = pkgs.hello;
+          # `nix run .#find` will work because findutils.meta.mainProgram is set to "find".
+          find = pkgs.findutils;
         };
-        apps = rec {
-          hello = flake-utils.lib.mkApp { drv = self.packages.${system}.hello; };
-          default = hello;
+        # Use apps to expose packages that have multiple binaries.
+        apps = {
+          xargs = flake-utils.lib.mkApp {
+            drv = pkgs.findutils;
+            name = "xargs";
+          };
+          ls = flake-utils.lib.mkApp {
+            drv = pkgs.coreutils;
+            name = "ls";
+          };
         };
       }
     );
