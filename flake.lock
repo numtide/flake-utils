@@ -6,6 +6,7 @@
       }
     },
     "systems": {
+      "flake": false,
       "locked": {
         "lastModified": 1791244623,
         "narHash": "sha256-uuanbkFk8a313Zfrxdcz8Us/yQtaxNnKJtX8v0ZPpd8=",

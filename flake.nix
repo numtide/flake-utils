@@ -2,6 +2,7 @@
   description = "Pure Nix flake utility functions";
 
   # Externally extensible flake systems. See <https://github.com/nix-systems/nix-systems>.
+  inputs.systems.flake = false;
   inputs.systems.url = "github:nix-systems/default";
 
   outputs = { self, systems }: {
