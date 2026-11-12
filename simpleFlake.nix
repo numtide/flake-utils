@@ -65,16 +65,21 @@ let
     )
     //
     (
+      if packages ? default then {
+        packages.default = packages.default;
+      } else { }
+    )
+    //
+    (
       if packages ? checks then {
         checks = packages.checks;
       } else { }
     )
     //
     (
-      if shell != null then {
-        devShell = shell_ { inherit pkgs; };
-      } else if packages ? devShell then {
-        devShell = packages.devShell;
+      if shell != null then rec {
+        devShells.${name} = shell_ { inherit pkgs; };
+        devShells.default = devShells.${name};
       } else { }
     )
   );
